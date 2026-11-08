@@ -199,9 +199,22 @@ local meshes: { [string]: Mesh } = {
 		bboxMax = {7.857, 5.179, 3.393},
 		size = {15.714, 5.179, 6.786},
 		pivotOffset = {0, -2.589, 0},
-		triangles = 184,
+		triangles = 94,
 		materials = {
 			{ name = "SITE_Car", maps = { Color = "SITE_Car_Color.png", Normal = "SITE_Car_Normal.png", Roughness = "SITE_Car_Roughness.png" } },
+		},
+		attachments = {
+		},
+	},
+	SITE_Car_Paint = {
+		group = "SITE",
+		pivot = {0, 0, 0},
+		bboxMin = {-7.857, 0.607, -3.214},
+		bboxMax = {7.857, 5.179, 3.214},
+		size = {15.714, 4.571, 6.429},
+		pivotOffset = {0, -2.893, 0},
+		triangles = 90,
+		materials = {
 			{ name = "SITE_Car_Paint", maps = { Color = "SITE_Car_Paint_Color.png", Normal = "SITE_Car_Paint_Normal.png", Roughness = "SITE_Car_Paint_Roughness.png" } },
 		},
 		attachments = {
@@ -261,16 +274,29 @@ local meshes: { [string]: Mesh } = {
 		bboxMax = {4.248, 87.5, 3.429},
 		size = {6.391, 87.5, 6.857},
 		pivotOffset = {-1.052, -43.75, 0},
-		triangles = 376,
+		triangles = 368,
 		materials = {
 			{ name = "SITE_FloodPole", maps = { Color = "SITE_FloodPole_Color.png", Normal = "SITE_FloodPole_Normal.png", Roughness = "SITE_FloodPole_Roughness.png" } },
-			{ name = "SITE_FloodPole_Lens", maps = { Color = "SITE_FloodPole_Lens_Color.png", Normal = "SITE_FloodPole_Lens_Normal.png", Roughness = "SITE_FloodPole_Lens_Roughness.png" } },
 		},
 		attachments = {
 			{ name = "Lamp0", localStuds = {3.985, 57.275, 0}, worldStuds = {3.985, 57.275, 0} },
 			{ name = "Lamp1", localStuds = {3.985, 65.847, 0}, worldStuds = {3.985, 65.847, 0} },
 			{ name = "Lamp2", localStuds = {3.985, 74.418, 0}, worldStuds = {3.985, 74.418, 0} },
 			{ name = "Lamp3", localStuds = {3.985, 82.99, 0}, worldStuds = {3.985, 82.99, 0} },
+		},
+	},
+	SITE_FloodPole_Lens = {
+		group = "SITE",
+		pivot = {0, 0, 0},
+		bboxMin = {3.876, 56.787, -2.964},
+		bboxMax = {4.094, 83.478, 2.964},
+		size = {0.218, 26.69, 5.929},
+		pivotOffset = {-3.985, -70.132, 0},
+		triangles = 8,
+		materials = {
+			{ name = "SITE_FloodPole_Lens", maps = { Color = "SITE_FloodPole_Lens_Color.png", Normal = "SITE_FloodPole_Lens_Normal.png", Roughness = "SITE_FloodPole_Lens_Roughness.png" } },
+		},
+		attachments = {
 		},
 	},
 	SITE_Hangar = {
@@ -280,9 +306,22 @@ local meshes: { [string]: Mesh } = {
 		bboxMax = {-475, 68.571, -190},
 		size = {228.571, 68.929, 117.143},
 		pivotOffset = {0, -34.107, -1.429},
-		triangles = 110,
+		triangles = 106,
 		materials = {
 			{ name = "SITE_Hangar", maps = { Color = "SITE_Hangar_Color.png", Normal = "SITE_Hangar_Normal.png", Roughness = "SITE_Hangar_Roughness.png" } },
+		},
+		attachments = {
+		},
+	},
+	SITE_Hangar_Door = {
+		group = "SITE",
+		pivot = {-589.286, 0, -250},
+		bboxMin = {-660.714, -0.179, -193.929},
+		bboxMax = {-517.857, 46.429, -193.929},
+		size = {142.857, 46.607, 0},
+		pivotOffset = {0, -23.125, -56.071},
+		triangles = 4,
+		materials = {
 			{ name = "SITE_Hangar_Door", maps = { Color = "SITE_Hangar_Door_Color.png", Normal = "SITE_Hangar_Door_Normal.png", Roughness = "SITE_Hangar_Door_Roughness.png" } },
 		},
 		attachments = {
@@ -3182,9 +3221,22 @@ local meshes: { [string]: Mesh } = {
 		bboxMax = {2, 35.714, 2},
 		size = {4, 7.143, 4},
 		pivotOffset = {0, 3.571, 0},
-		triangles = 578,
+		triangles = 360,
 		materials = {
 			{ name = "VEH_Engine_SL_Outer", maps = { Color = "VEH_Engine_SL_Outer_Color.png", Metalness = "VEH_Engine_SL_Outer_Metalness.png", Normal = "VEH_Engine_SL_Outer_Normal.png", Roughness = "VEH_Engine_SL_Outer_Roughness.png" } },
+		},
+		attachments = {
+		},
+	},
+	VEH_Engine_SL_0_Inner = {
+		group = "VEH",
+		pivot = {0, 35.714, 0},
+		bboxMin = {-1.946, 28.571, -1.946},
+		bboxMax = {1.946, 35.643, 1.946},
+		size = {3.893, 7.071, 3.893},
+		pivotOffset = {0, 3.607, 0},
+		triangles = 218,
+		materials = {
 			{ name = "VEH_Engine_SL_Inner", maps = { Color = "VEH_Engine_SL_Inner_Color.png", Metalness = "VEH_Engine_SL_Inner_Metalness.png", Normal = "VEH_Engine_SL_Inner_Normal.png", Roughness = "VEH_Engine_SL_Inner_Roughness.png" } },
 		},
 		attachments = {
@@ -3197,9 +3249,22 @@ local meshes: { [string]: Mesh } = {
 		bboxMax = {7.114, 35.714, 4.118},
 		size = {4, 7.143, 4},
 		pivotOffset = {0, 3.571, 0},
-		triangles = 578,
+		triangles = 360,
 		materials = {
 			{ name = "VEH_Engine_SL_Outer", maps = { Color = "VEH_Engine_SL_Outer_Color.png", Metalness = "VEH_Engine_SL_Outer_Metalness.png", Normal = "VEH_Engine_SL_Outer_Normal.png", Roughness = "VEH_Engine_SL_Outer_Roughness.png" } },
+		},
+		attachments = {
+		},
+	},
+	VEH_Engine_SL_1_Inner = {
+		group = "VEH",
+		pivot = {5.114, 35.714, 2.118},
+		bboxMin = {3.168, 28.571, 0.172},
+		bboxMax = {7.061, 35.643, 4.065},
+		size = {3.893, 7.071, 3.893},
+		pivotOffset = {0, 3.607, 0},
+		triangles = 218,
+		materials = {
 			{ name = "VEH_Engine_SL_Inner", maps = { Color = "VEH_Engine_SL_Inner_Color.png", Metalness = "VEH_Engine_SL_Inner_Metalness.png", Normal = "VEH_Engine_SL_Inner_Normal.png", Roughness = "VEH_Engine_SL_Inner_Roughness.png" } },
 		},
 		attachments = {
@@ -3212,9 +3277,22 @@ local meshes: { [string]: Mesh } = {
 		bboxMax = {4.118, 35.714, 7.114},
 		size = {4, 7.143, 4},
 		pivotOffset = {0, 3.571, 0},
-		triangles = 578,
+		triangles = 360,
 		materials = {
 			{ name = "VEH_Engine_SL_Outer", maps = { Color = "VEH_Engine_SL_Outer_Color.png", Metalness = "VEH_Engine_SL_Outer_Metalness.png", Normal = "VEH_Engine_SL_Outer_Normal.png", Roughness = "VEH_Engine_SL_Outer_Roughness.png" } },
+		},
+		attachments = {
+		},
+	},
+	VEH_Engine_SL_2_Inner = {
+		group = "VEH",
+		pivot = {2.118, 35.714, 5.114},
+		bboxMin = {0.172, 28.571, 3.168},
+		bboxMax = {4.065, 35.643, 7.061},
+		size = {3.893, 7.071, 3.893},
+		pivotOffset = {0, 3.607, 0},
+		triangles = 218,
+		materials = {
 			{ name = "VEH_Engine_SL_Inner", maps = { Color = "VEH_Engine_SL_Inner_Color.png", Metalness = "VEH_Engine_SL_Inner_Metalness.png", Normal = "VEH_Engine_SL_Inner_Normal.png", Roughness = "VEH_Engine_SL_Inner_Roughness.png" } },
 		},
 		attachments = {
@@ -3227,9 +3305,22 @@ local meshes: { [string]: Mesh } = {
 		bboxMax = {-0.118, 35.714, 7.114},
 		size = {4, 7.143, 4},
 		pivotOffset = {0, 3.571, 0},
-		triangles = 578,
+		triangles = 360,
 		materials = {
 			{ name = "VEH_Engine_SL_Outer", maps = { Color = "VEH_Engine_SL_Outer_Color.png", Metalness = "VEH_Engine_SL_Outer_Metalness.png", Normal = "VEH_Engine_SL_Outer_Normal.png", Roughness = "VEH_Engine_SL_Outer_Roughness.png" } },
+		},
+		attachments = {
+		},
+	},
+	VEH_Engine_SL_3_Inner = {
+		group = "VEH",
+		pivot = {-2.118, 35.714, 5.114},
+		bboxMin = {-4.065, 28.571, 3.168},
+		bboxMax = {-0.172, 35.643, 7.061},
+		size = {3.893, 7.071, 3.893},
+		pivotOffset = {0, 3.607, 0},
+		triangles = 218,
+		materials = {
 			{ name = "VEH_Engine_SL_Inner", maps = { Color = "VEH_Engine_SL_Inner_Color.png", Metalness = "VEH_Engine_SL_Inner_Metalness.png", Normal = "VEH_Engine_SL_Inner_Normal.png", Roughness = "VEH_Engine_SL_Inner_Roughness.png" } },
 		},
 		attachments = {
@@ -3242,9 +3333,22 @@ local meshes: { [string]: Mesh } = {
 		bboxMax = {-3.114, 35.714, 4.118},
 		size = {4, 7.143, 4},
 		pivotOffset = {0, 3.571, 0},
-		triangles = 578,
+		triangles = 360,
 		materials = {
 			{ name = "VEH_Engine_SL_Outer", maps = { Color = "VEH_Engine_SL_Outer_Color.png", Metalness = "VEH_Engine_SL_Outer_Metalness.png", Normal = "VEH_Engine_SL_Outer_Normal.png", Roughness = "VEH_Engine_SL_Outer_Roughness.png" } },
+		},
+		attachments = {
+		},
+	},
+	VEH_Engine_SL_4_Inner = {
+		group = "VEH",
+		pivot = {-5.114, 35.714, 2.118},
+		bboxMin = {-7.061, 28.571, 0.172},
+		bboxMax = {-3.168, 35.643, 4.065},
+		size = {3.893, 7.071, 3.893},
+		pivotOffset = {0, 3.607, 0},
+		triangles = 218,
+		materials = {
 			{ name = "VEH_Engine_SL_Inner", maps = { Color = "VEH_Engine_SL_Inner_Color.png", Metalness = "VEH_Engine_SL_Inner_Metalness.png", Normal = "VEH_Engine_SL_Inner_Normal.png", Roughness = "VEH_Engine_SL_Inner_Roughness.png" } },
 		},
 		attachments = {
@@ -3257,9 +3361,22 @@ local meshes: { [string]: Mesh } = {
 		bboxMax = {-3.114, 35.714, -0.118},
 		size = {4, 7.143, 4},
 		pivotOffset = {0, 3.571, 0},
-		triangles = 578,
+		triangles = 360,
 		materials = {
 			{ name = "VEH_Engine_SL_Outer", maps = { Color = "VEH_Engine_SL_Outer_Color.png", Metalness = "VEH_Engine_SL_Outer_Metalness.png", Normal = "VEH_Engine_SL_Outer_Normal.png", Roughness = "VEH_Engine_SL_Outer_Roughness.png" } },
+		},
+		attachments = {
+		},
+	},
+	VEH_Engine_SL_5_Inner = {
+		group = "VEH",
+		pivot = {-5.114, 35.714, -2.118},
+		bboxMin = {-7.061, 28.571, -4.065},
+		bboxMax = {-3.168, 35.643, -0.172},
+		size = {3.893, 7.071, 3.893},
+		pivotOffset = {0, 3.607, 0},
+		triangles = 218,
+		materials = {
 			{ name = "VEH_Engine_SL_Inner", maps = { Color = "VEH_Engine_SL_Inner_Color.png", Metalness = "VEH_Engine_SL_Inner_Metalness.png", Normal = "VEH_Engine_SL_Inner_Normal.png", Roughness = "VEH_Engine_SL_Inner_Roughness.png" } },
 		},
 		attachments = {
@@ -3272,9 +3389,22 @@ local meshes: { [string]: Mesh } = {
 		bboxMax = {-0.118, 35.714, -3.114},
 		size = {4, 7.143, 4},
 		pivotOffset = {0, 3.571, 0},
-		triangles = 578,
+		triangles = 360,
 		materials = {
 			{ name = "VEH_Engine_SL_Outer", maps = { Color = "VEH_Engine_SL_Outer_Color.png", Metalness = "VEH_Engine_SL_Outer_Metalness.png", Normal = "VEH_Engine_SL_Outer_Normal.png", Roughness = "VEH_Engine_SL_Outer_Roughness.png" } },
+		},
+		attachments = {
+		},
+	},
+	VEH_Engine_SL_6_Inner = {
+		group = "VEH",
+		pivot = {-2.118, 35.714, -5.114},
+		bboxMin = {-4.065, 28.571, -7.061},
+		bboxMax = {-0.172, 35.643, -3.168},
+		size = {3.893, 7.071, 3.893},
+		pivotOffset = {0, 3.607, 0},
+		triangles = 218,
+		materials = {
 			{ name = "VEH_Engine_SL_Inner", maps = { Color = "VEH_Engine_SL_Inner_Color.png", Metalness = "VEH_Engine_SL_Inner_Metalness.png", Normal = "VEH_Engine_SL_Inner_Normal.png", Roughness = "VEH_Engine_SL_Inner_Roughness.png" } },
 		},
 		attachments = {
@@ -3287,9 +3417,22 @@ local meshes: { [string]: Mesh } = {
 		bboxMax = {4.118, 35.714, -3.114},
 		size = {4, 7.143, 4},
 		pivotOffset = {0, 3.571, 0},
-		triangles = 578,
+		triangles = 360,
 		materials = {
 			{ name = "VEH_Engine_SL_Outer", maps = { Color = "VEH_Engine_SL_Outer_Color.png", Metalness = "VEH_Engine_SL_Outer_Metalness.png", Normal = "VEH_Engine_SL_Outer_Normal.png", Roughness = "VEH_Engine_SL_Outer_Roughness.png" } },
+		},
+		attachments = {
+		},
+	},
+	VEH_Engine_SL_7_Inner = {
+		group = "VEH",
+		pivot = {2.118, 35.714, -5.114},
+		bboxMin = {0.172, 28.571, -7.061},
+		bboxMax = {4.065, 35.643, -3.168},
+		size = {3.893, 7.071, 3.893},
+		pivotOffset = {0, 3.607, 0},
+		triangles = 218,
+		materials = {
 			{ name = "VEH_Engine_SL_Inner", maps = { Color = "VEH_Engine_SL_Inner_Color.png", Metalness = "VEH_Engine_SL_Inner_Metalness.png", Normal = "VEH_Engine_SL_Inner_Normal.png", Roughness = "VEH_Engine_SL_Inner_Roughness.png" } },
 		},
 		attachments = {
@@ -3302,9 +3445,22 @@ local meshes: { [string]: Mesh } = {
 		bboxMax = {7.114, 35.714, -0.118},
 		size = {4, 7.143, 4},
 		pivotOffset = {0, 3.571, 0},
-		triangles = 578,
+		triangles = 360,
 		materials = {
 			{ name = "VEH_Engine_SL_Outer", maps = { Color = "VEH_Engine_SL_Outer_Color.png", Metalness = "VEH_Engine_SL_Outer_Metalness.png", Normal = "VEH_Engine_SL_Outer_Normal.png", Roughness = "VEH_Engine_SL_Outer_Roughness.png" } },
+		},
+		attachments = {
+		},
+	},
+	VEH_Engine_SL_8_Inner = {
+		group = "VEH",
+		pivot = {5.114, 35.714, -2.118},
+		bboxMin = {3.168, 28.571, -4.065},
+		bboxMax = {7.061, 35.643, -0.172},
+		size = {3.893, 7.071, 3.893},
+		pivotOffset = {0, 3.607, 0},
+		triangles = 218,
+		materials = {
 			{ name = "VEH_Engine_SL_Inner", maps = { Color = "VEH_Engine_SL_Inner_Color.png", Metalness = "VEH_Engine_SL_Inner_Metalness.png", Normal = "VEH_Engine_SL_Inner_Normal.png", Roughness = "VEH_Engine_SL_Inner_Roughness.png" } },
 		},
 		attachments = {
@@ -3477,9 +3633,22 @@ local meshes: { [string]: Mesh } = {
 		bboxMax = {4.107, 193.571, 4.107},
 		size = {8.214, 12.5, 8.214},
 		pivotOffset = {0, 6.25, 0},
-		triangles = 798,
+		triangles = 512,
 		materials = {
 			{ name = "VEH_MVac_Outer", maps = { Color = "VEH_MVac_Outer_Color.png", Metalness = "VEH_MVac_Outer_Metalness.png", Normal = "VEH_MVac_Outer_Normal.png", Roughness = "VEH_MVac_Outer_Roughness.png" } },
+		},
+		attachments = {
+		},
+	},
+	VEH_MVac_Inner = {
+		group = "VEH",
+		pivot = {0, 193.571, 0},
+		bboxMin = {-4.034, 181.071, -4.034},
+		bboxMax = {4.034, 193.571, 4.034},
+		size = {8.067, 12.5, 8.067},
+		pivotOffset = {0, 6.25, 0},
+		triangles = 286,
+		materials = {
 			{ name = "VEH_MVac_Inner", maps = { Color = "VEH_MVac_Inner_Color.png", Metalness = "VEH_MVac_Inner_Metalness.png", Normal = "VEH_MVac_Inner_Normal.png", Roughness = "VEH_MVac_Inner_Roughness.png" } },
 		},
 		attachments = {

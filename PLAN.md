@@ -83,6 +83,10 @@ README's steps, about 10 minutes). I then do the same verification and repair.
   `_Lens`, `_Door`). Re-export VEH.fbx and SITE.fbx, then upload VEH as a new revision of the same asset, not a
   new one.
 
+**Done, Nov 8:** the split re-export (PR #2) went up as VEH revision 2. All 33 parts match the manifest to
+0.001 studs with one SurfaceAppearance each. The outer bells carry the 512 px outer maps and the `_Inner` parts
+the 256 px soot maps. It replaced the pilot in `Workspace.Port.VEH`.
+
 ### 2. Import PAD, TWR, SITE
 
 Same flow and checks, run by `tools/import_fix.py <GROUP> <path>`. SITE.fbx is 17.3 MB, under the 20 MB upload

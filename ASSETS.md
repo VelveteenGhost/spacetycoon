@@ -5,7 +5,7 @@ unused ones in the Creator Dashboard. A fixed file goes up as a new revision of 
 
 | Asset | ID | Source | Revision | Uploaded | In the place | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| VEH Pathfinder | 130623056517308 | `export/fbx/VEH.fbx` | 1 | 2026-11-08 | `Workspace.Port.VEH` | Engine and MVac materials wrong until the split re-export goes up as revision 2 |
+| VEH Pathfinder | 130623056517308 | `export/fbx/VEH.fbx` | 2 | 2026-11-08 | `Workspace.Port.VEH` | Revision 2 is the split re-export (33 parts, one material each), verified against the manifest. Revision 1 had the two-material bug |
 | PAD Launch Mount | 138977096256584 | `export/fbx/PAD.fbx` | 1 | 2026-11-08 | `Workspace.Port.PAD` | Verified against the manifest |
 | TWR Service Tower | 86272731500333 | `export/fbx/TWR.fbx` | 1 | 2026-11-08 | `Workspace.Port.TWR` | Verified against the manifest |
 

@@ -4,6 +4,14 @@ Newest first. One line of reason each.
 
 ## 2026-11-08
 
+- **Strip the importer's rig from SITE, but keep the flag's RootPart, bones, Motor6D and AnimationController in
+  their own `Flag` model.** 208 joints on static props are clutter and would tie moved copies back to the root.
+  The flag still needs its skeleton for the wave.
+- **Keep origin-modelled props as templates in `ServerStorage.PortTemplates`, one model per prop or pair, pivot
+  at the origin.** They were sitting on the pad, and SceneBuilder copies them out by the manifest's placement
+  rules.
+- **Upload SITE myself after the split, rather than wait for a second agent.** The Blender agent handled VEH's
+  revision; SITE had no asset yet, and the checks live here.
 - **Split the 13 two-material meshes into one object per material before upload, rather than patch them in
   Studio.** A MeshPart renders only one SurfaceAppearance, and the effects need those surfaces separate anyway:
   bell glow, nozzle heat ramp, paint tints, lit lenses.

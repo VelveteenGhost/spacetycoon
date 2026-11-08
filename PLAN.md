@@ -92,9 +92,20 @@ the 256 px soot maps. It replaced the pilot in `Workspace.Port.VEH`.
 Same flow and checks, run by `tools/import_fix.py <GROUP> <path>`. SITE.fbx is 17.3 MB, under the 20 MB upload
 cap, and waits for the split re-export.
 
-**Progress, Nov 8:** PAD (138977096256584) and TWR (86272731500333) are uploaded and verified: every mesh is within
-0.004 studs of the manifest, with one SurfaceAppearance each. VEH, PAD and TWR sit in `Workspace.Port` at their
-table positions. Asset IDs are tracked in `ASSETS.md`.
+**Done, Nov 8.** All four groups are uploaded and verified: every mesh is within 0.012 studs of the manifest,
+with one SurfaceAppearance each. Asset IDs are tracked in `ASSETS.md`.
+
+- `Workspace.Port` holds VEH, PAD and TWR. `Port.SITE` holds the in-place `Structures`, the `Flag` rig and the 184
+  `Belts` tiles.
+- `ServerStorage.PortTemplates` holds the 14 props modelled at the origin, for SceneBuilder to copy: cars,
+  flood poles, masts, fence and power poles, distant pads, and the vegetation variants. Each pair is one model.
+- **SITE came in as a rig**, because the flag's armature made the importer treat the whole file as a character.
+  It arrived with a RootPart at the site origin, an AnimationController and a Motor6D from the RootPart to every
+  mesh. The Motor6Ds were removed except the flag's. The RootPart, its seven bones and the flag's saved poses
+  stay in the `Flag` model.
+- Client check: in a playtest, all 242 MeshParts replicate, and `PreloadAsync` on the parts loads every mesh
+  and map. Passing bare ID strings instead reports "Asset type does not match requested type", which is a test
+  artefact, not a broken asset.
 
 ### 3. Scene assembly
 

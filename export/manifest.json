@@ -4,7 +4,8 @@
     "axes": "FBX -Z forward, Y up; table/Roblox (x, y, z) = Blender (x, -z, y)",
     "pivots": "object origin = table pivot; pivot_offset_studs = pivot minus bbox centre, Roblox axes",
     "normal_maps": "tangent space, OpenGL (+Y up), MikkTSpace on the triangulated mesh",
-    "textures": "8-bit PNG; Color is sRGB; Normal, Roughness, Metalness are linear"
+    "textures": "8-bit PNG; Color is sRGB; Normal, Roughness, Metalness are linear",
+    "parts": "one material per object; a mesh with a second material ships as <name> plus <name>_<Inner|Paint|Lens|Door> with the same pivot (parts / part_of link them)"
   },
   "meshes": {
     "PAD_Apron": {
@@ -970,7 +971,7 @@
       "name": "SITE_Car",
       "group": "SITE",
       "fbx": "export/fbx/SITE.fbx",
-      "triangles": 184,
+      "triangles": 94,
       "budget": 200,
       "pivot_m": [
         0.0,
@@ -1010,7 +1011,54 @@
             "Normal": "export/textures/SITE_Car_Normal.png",
             "Roughness": "export/textures/SITE_Car_Roughness.png"
           }
-        },
+        }
+      ],
+      "notes": "Placement: 34 copies of SITE_Car with SITE_Car_Paint (one pivot, so both parts take the same CFrame), car i = 0..33 at (-662 + (i % 17) * 2.7, 0, 58 + floor(i / 17) * 13), yaw 90 deg about Y (nose toward -Z, the range-ops building), as in the mood study. If the car-park surface is raised (mood study asphalt top y 0.14), raise the cars by the same amount. Paint: SITE_Car_Paint is its own part; put SurfaceAppearance.Color on it only. Paint map average sRGB (0.833, 0.833, 0.833), linear (0.740, 0.740, 0.740). Tints that reproduce the six mood-study paints (linear-space multiply): white #d8d8d4 -> Color #f7f7f2 (247, 247, 242), black #1d1f22 -> Color #232528 (35, 37, 40), grey #7d8086 -> Color #90939a (144, 147, 154), dark red #5a1f1c -> Color #682522 (104, 37, 34), navy #22324a -> Color #283b56 (40, 59, 86), beige #b9b2a4 -> Color #d4ccbc (212, 204, 188). If Roblox multiplied in sRGB space instead, the tints differ by at most 12/255. Colour assignment (the mood study picks paints at random; this is a fixed mix): paint index per car i, 0 white 1 black 2 grey 3 dark red 4 navy 5 beige: 0210514023012504120310245102301420 (white 10, black 7, grey 7, dark red 3, navy 4, beige 3). Front toward +X before the yaw; seen from 2 km or more, so the 256 maps are deliberate.",
+      "texel_px_per_m": {
+        "0": 55.5
+      },
+      "parts": [
+        "SITE_Car_Paint"
+      ],
+      "triangles_with_parts": 184
+    },
+    "SITE_Car_Paint": {
+      "name": "SITE_Car_Paint",
+      "group": "SITE",
+      "fbx": "export/fbx/SITE.fbx",
+      "triangles": 90,
+      "budget": null,
+      "pivot_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pivot_studs": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bbox_min_studs": [
+        -7.857,
+        0.607,
+        -3.214
+      ],
+      "bbox_max_studs": [
+        7.857,
+        5.179,
+        3.214
+      ],
+      "size_studs": [
+        15.714,
+        4.571,
+        6.429
+      ],
+      "pivot_offset_studs": [
+        0.0,
+        -2.893,
+        0.0
+      ],
+      "materials": [
         {
           "name": "SITE_Car_Paint",
           "maps": {
@@ -1020,11 +1068,11 @@
           }
         }
       ],
-      "notes": "Placement: 34 copies, car i = 0..33 at (-662 + (i % 17) * 2.7, 0, 58 + floor(i / 17) * 13), yaw 90 deg about Y (nose toward -Z, the range-ops building), as in the mood study. If the car-park surface is raised (mood study asphalt top y 0.14), raise the cars by the same amount. Paint: the importer makes two MeshParts; put SurfaceAppearance.Color on the SITE_Car_Paint part only. Paint map average sRGB (0.833, 0.833, 0.833), linear (0.740, 0.740, 0.740). Tints that reproduce the six mood-study paints (linear-space multiply): white #d8d8d4 -> Color #f7f7f2 (247, 247, 242), black #1d1f22 -> Color #232528 (35, 37, 40), grey #7d8086 -> Color #90939a (144, 147, 154), dark red #5a1f1c -> Color #682522 (104, 37, 34), navy #22324a -> Color #283b56 (40, 59, 86), beige #b9b2a4 -> Color #d4ccbc (212, 204, 188). If Roblox multiplied in sRGB space instead, the tints differ by at most 12/255. Colour assignment (the mood study picks paints at random; this is a fixed mix): paint index per car i, 0 white 1 black 2 grey 3 dark red 4 navy 5 beige: 0210514023012504120310245102301420 (white 10, black 7, grey 7, dark red 3, navy 4, beige 3). Front toward +X before the yaw; seen from 2 km or more, so the 256 maps are deliberate.",
+      "notes": "The paint material of SITE_Car as its own part, since Roblox gives each MeshPart one material. Same pivot as SITE_Car: give it the same CFrame, or keep both in one Model. Counts toward SITE_Car's budget.",
       "texel_px_per_m": {
-        "0": 55.5,
-        "1": 54.6
-      }
+        "0": 54.6
+      },
+      "part_of": "SITE_Car"
     },
     "SITE_DistantPad": {
       "name": "SITE_DistantPad",
@@ -1281,7 +1329,7 @@
       "name": "SITE_FloodPole",
       "group": "SITE",
       "fbx": "export/fbx/SITE.fbx",
-      "triangles": 376,
+      "triangles": 368,
       "budget": 600,
       "pivot_m": [
         0.0,
@@ -1321,20 +1369,11 @@
             "Normal": "export/textures/SITE_FloodPole_Normal.png",
             "Roughness": "export/textures/SITE_FloodPole_Roughness.png"
           }
-        },
-        {
-          "name": "SITE_FloodPole_Lens",
-          "maps": {
-            "Color": "export/textures/SITE_FloodPole_Lens_Color.png",
-            "Normal": "export/textures/SITE_FloodPole_Lens_Normal.png",
-            "Roughness": "export/textures/SITE_FloodPole_Lens_Roughness.png"
-          }
         }
       ],
-      "notes": "Modelled once at the origin with the lamps aimed toward +X. Place four copies, rotated about +Y (right-hand rule, table axes; CFrame.Angles(0, rad(yaw), 0)) so the lamps face the pad centre: (34, 0, 34) yaw +135; (-34, 0, 34) yaw +45; (34, 0, -34) yaw -135; (-34, 0, -34) yaw -45. Lamp0..3 are the lens centres; each lamp's beam axis is (cos 12.6, sin 12.6, 0) before the yaw. SITE_FloodPole_Lens is drawn in the lit state (bright warm white with the reflector pattern): by day tint it down (SurfaceAppearance.Color about #3b3e43, the mood study's dark glass) and restore white with the glow at night.",
+      "notes": "Modelled once at the origin with the lamps aimed toward +X. Place four copies of SITE_FloodPole with SITE_FloodPole_Lens (one pivot, so both parts take the same CFrame), rotated about +Y (right-hand rule, table axes; CFrame.Angles(0, rad(yaw), 0)) so the lamps face the pad centre: (34, 0, 34) yaw +135; (-34, 0, 34) yaw +45; (34, 0, -34) yaw -135; (-34, 0, -34) yaw -45. Lamp0..3 are the lens centres; each lamp's beam axis is (cos 12.6, sin 12.6, 0) before the yaw. SITE_FloodPole_Lens, the four lens faces as their own part, is drawn in the lit state (bright warm white with the reflector pattern): by day tint it down (SurfaceAppearance.Color about #3b3e43, the mood study's dark glass) and restore white with the glow at night.",
       "texel_px_per_m": {
-        "0": 44.1,
-        "1": 65.1
+        "0": 44.1
       },
       "attachments": [
         {
@@ -1409,13 +1448,69 @@
             0.0
           ]
         }
-      ]
+      ],
+      "parts": [
+        "SITE_FloodPole_Lens"
+      ],
+      "triangles_with_parts": 376
+    },
+    "SITE_FloodPole_Lens": {
+      "name": "SITE_FloodPole_Lens",
+      "group": "SITE",
+      "fbx": "export/fbx/SITE.fbx",
+      "triangles": 8,
+      "budget": null,
+      "pivot_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pivot_studs": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bbox_min_studs": [
+        3.876,
+        56.787,
+        -2.964
+      ],
+      "bbox_max_studs": [
+        4.094,
+        83.478,
+        2.964
+      ],
+      "size_studs": [
+        0.218,
+        26.69,
+        5.929
+      ],
+      "pivot_offset_studs": [
+        -3.985,
+        -70.132,
+        0.0
+      ],
+      "materials": [
+        {
+          "name": "SITE_FloodPole_Lens",
+          "maps": {
+            "Color": "export/textures/SITE_FloodPole_Lens_Color.png",
+            "Normal": "export/textures/SITE_FloodPole_Lens_Normal.png",
+            "Roughness": "export/textures/SITE_FloodPole_Lens_Roughness.png"
+          }
+        }
+      ],
+      "notes": "The lens material of SITE_FloodPole as its own part, since Roblox gives each MeshPart one material. Same pivot as SITE_FloodPole: give it the same CFrame, or keep both in one Model. Counts toward SITE_FloodPole's budget.",
+      "texel_px_per_m": {
+        "0": 65.1
+      },
+      "part_of": "SITE_FloodPole"
     },
     "SITE_Hangar": {
       "name": "SITE_Hangar",
       "group": "SITE",
       "fbx": "export/fbx/SITE.fbx",
-      "triangles": 110,
+      "triangles": 106,
       "budget": 400,
       "pivot_m": [
         -165.0,
@@ -1455,7 +1550,54 @@
             "Normal": "export/textures/SITE_Hangar_Normal.png",
             "Roughness": "export/textures/SITE_Hangar_Roughness.png"
           }
-        },
+        }
+      ],
+      "notes": "Modelled in place; pivot at the base centre (-165, 0, -70). The door, SITE_Hangar_Door (its own part, same pivot), fills the 40 x 13 m opening on the +Z face, 0.3 m back from the wall face, x -185..-145.",
+      "texel_px_per_m": {
+        "0": 12.3
+      },
+      "parts": [
+        "SITE_Hangar_Door"
+      ],
+      "triangles_with_parts": 110
+    },
+    "SITE_Hangar_Door": {
+      "name": "SITE_Hangar_Door",
+      "group": "SITE",
+      "fbx": "export/fbx/SITE.fbx",
+      "triangles": 4,
+      "budget": null,
+      "pivot_m": [
+        -165.0,
+        0.0,
+        -70.0
+      ],
+      "pivot_studs": [
+        -589.286,
+        0.0,
+        -250.0
+      ],
+      "bbox_min_studs": [
+        -660.714,
+        -0.179,
+        -193.929
+      ],
+      "bbox_max_studs": [
+        -517.857,
+        46.429,
+        -193.929
+      ],
+      "size_studs": [
+        142.857,
+        46.607,
+        0.0
+      ],
+      "pivot_offset_studs": [
+        0.0,
+        -23.125,
+        -56.071
+      ],
+      "materials": [
         {
           "name": "SITE_Hangar_Door",
           "maps": {
@@ -1465,11 +1607,11 @@
           }
         }
       ],
-      "notes": "Modelled in place; pivot at the base centre (-165, 0, -70). The door (SITE_Hangar_Door) fills the 40 x 13 m opening on the +Z face, 0.3 m back from the wall face, x -185..-145.",
+      "notes": "The door material of SITE_Hangar as its own part, since Roblox gives each MeshPart one material. Same pivot as SITE_Hangar: give it the same CFrame, or keep both in one Model. Counts toward SITE_Hangar's budget.",
       "texel_px_per_m": {
-        "0": 12.3,
-        "1": 18.5
-      }
+        "0": 18.5
+      },
+      "part_of": "SITE_Hangar"
     },
     "SITE_Mast": {
       "name": "SITE_Mast",
@@ -12242,7 +12384,7 @@
       "name": "VEH_Engine_SL_0",
       "group": "VEH",
       "fbx": "export/fbx/VEH.fbx",
-      "triangles": 578,
+      "triangles": 360,
       "budget": 600,
       "pivot_m": [
         0.0,
@@ -12283,7 +12425,54 @@
             "Roughness": "export/textures/VEH_Engine_SL_Outer_Roughness.png",
             "Metalness": "export/textures/VEH_Engine_SL_Outer_Metalness.png"
           }
-        },
+        }
+      ],
+      "notes": "Nine objects share one mesh: _0 is the centre engine, _1.._8 sit on the r 1.55 ring at azimuth 22.5 + k*45. VEH_Engine_SL_k_Inner is the inner bell as its own part, for the firing glow; it shares the engine's pivot.",
+      "texel_px_per_m": {
+        "0": 139.8
+      },
+      "parts": [
+        "VEH_Engine_SL_0_Inner"
+      ],
+      "triangles_with_parts": 578
+    },
+    "VEH_Engine_SL_0_Inner": {
+      "name": "VEH_Engine_SL_0_Inner",
+      "group": "VEH",
+      "fbx": "export/fbx/VEH.fbx",
+      "triangles": 218,
+      "budget": null,
+      "pivot_m": [
+        0.0,
+        10.0,
+        0.0
+      ],
+      "pivot_studs": [
+        0.0,
+        35.714,
+        0.0
+      ],
+      "bbox_min_studs": [
+        -1.946,
+        28.571,
+        -1.946
+      ],
+      "bbox_max_studs": [
+        1.946,
+        35.643,
+        1.946
+      ],
+      "size_studs": [
+        3.893,
+        7.071,
+        3.893
+      ],
+      "pivot_offset_studs": [
+        0.0,
+        3.607,
+        0.0
+      ],
+      "materials": [
         {
           "name": "VEH_Engine_SL_Inner",
           "maps": {
@@ -12294,17 +12483,17 @@
           }
         }
       ],
-      "notes": "Nine objects share one mesh: _0 is the centre engine, _1.._8 sit on the r 1.55 ring at azimuth 22.5 + k*45. The _Inner material is the inner bell for the firing glow.",
+      "notes": "The inner material of VEH_Engine_SL_0 as its own part, since Roblox gives each MeshPart one material. Same pivot as VEH_Engine_SL_0: give it the same CFrame, or keep both in one Model. Counts toward VEH_Engine_SL_0's budget.",
       "texel_px_per_m": {
-        "0": 139.8,
-        "1": 68.9
-      }
+        "0": 68.9
+      },
+      "part_of": "VEH_Engine_SL_0"
     },
     "VEH_Engine_SL_1": {
       "name": "VEH_Engine_SL_1",
       "group": "VEH",
       "fbx": "export/fbx/VEH.fbx",
-      "triangles": 578,
+      "triangles": 360,
       "budget": 600,
       "pivot_m": [
         1.432,
@@ -12345,7 +12534,51 @@
             "Roughness": "export/textures/VEH_Engine_SL_Outer_Roughness.png",
             "Metalness": "export/textures/VEH_Engine_SL_Outer_Metalness.png"
           }
-        },
+        }
+      ],
+      "notes": "Nine objects share one mesh: _0 is the centre engine, _1.._8 sit on the r 1.55 ring at azimuth 22.5 + k*45. VEH_Engine_SL_k_Inner is the inner bell as its own part, for the firing glow; it shares the engine's pivot.",
+      "parts": [
+        "VEH_Engine_SL_1_Inner"
+      ],
+      "triangles_with_parts": 578
+    },
+    "VEH_Engine_SL_1_Inner": {
+      "name": "VEH_Engine_SL_1_Inner",
+      "group": "VEH",
+      "fbx": "export/fbx/VEH.fbx",
+      "triangles": 218,
+      "budget": null,
+      "pivot_m": [
+        1.432,
+        10.0,
+        0.5932
+      ],
+      "pivot_studs": [
+        5.114,
+        35.714,
+        2.118
+      ],
+      "bbox_min_studs": [
+        3.168,
+        28.571,
+        0.172
+      ],
+      "bbox_max_studs": [
+        7.061,
+        35.643,
+        4.065
+      ],
+      "size_studs": [
+        3.893,
+        7.071,
+        3.893
+      ],
+      "pivot_offset_studs": [
+        0.0,
+        3.607,
+        0.0
+      ],
+      "materials": [
         {
           "name": "VEH_Engine_SL_Inner",
           "maps": {
@@ -12356,13 +12589,14 @@
           }
         }
       ],
-      "notes": "Nine objects share one mesh: _0 is the centre engine, _1.._8 sit on the r 1.55 ring at azimuth 22.5 + k*45. The _Inner material is the inner bell for the firing glow."
+      "notes": "The inner material of VEH_Engine_SL_1 as its own part, since Roblox gives each MeshPart one material. Same pivot as VEH_Engine_SL_1: give it the same CFrame, or keep both in one Model. Counts toward VEH_Engine_SL_1's budget.",
+      "part_of": "VEH_Engine_SL_1"
     },
     "VEH_Engine_SL_2": {
       "name": "VEH_Engine_SL_2",
       "group": "VEH",
       "fbx": "export/fbx/VEH.fbx",
-      "triangles": 578,
+      "triangles": 360,
       "budget": 600,
       "pivot_m": [
         0.5932,
@@ -12403,7 +12637,51 @@
             "Roughness": "export/textures/VEH_Engine_SL_Outer_Roughness.png",
             "Metalness": "export/textures/VEH_Engine_SL_Outer_Metalness.png"
           }
-        },
+        }
+      ],
+      "notes": "Nine objects share one mesh: _0 is the centre engine, _1.._8 sit on the r 1.55 ring at azimuth 22.5 + k*45. VEH_Engine_SL_k_Inner is the inner bell as its own part, for the firing glow; it shares the engine's pivot.",
+      "parts": [
+        "VEH_Engine_SL_2_Inner"
+      ],
+      "triangles_with_parts": 578
+    },
+    "VEH_Engine_SL_2_Inner": {
+      "name": "VEH_Engine_SL_2_Inner",
+      "group": "VEH",
+      "fbx": "export/fbx/VEH.fbx",
+      "triangles": 218,
+      "budget": null,
+      "pivot_m": [
+        0.5932,
+        10.0,
+        1.432
+      ],
+      "pivot_studs": [
+        2.118,
+        35.714,
+        5.114
+      ],
+      "bbox_min_studs": [
+        0.172,
+        28.571,
+        3.168
+      ],
+      "bbox_max_studs": [
+        4.065,
+        35.643,
+        7.061
+      ],
+      "size_studs": [
+        3.893,
+        7.071,
+        3.893
+      ],
+      "pivot_offset_studs": [
+        0.0,
+        3.607,
+        0.0
+      ],
+      "materials": [
         {
           "name": "VEH_Engine_SL_Inner",
           "maps": {
@@ -12414,13 +12692,14 @@
           }
         }
       ],
-      "notes": "Nine objects share one mesh: _0 is the centre engine, _1.._8 sit on the r 1.55 ring at azimuth 22.5 + k*45. The _Inner material is the inner bell for the firing glow."
+      "notes": "The inner material of VEH_Engine_SL_2 as its own part, since Roblox gives each MeshPart one material. Same pivot as VEH_Engine_SL_2: give it the same CFrame, or keep both in one Model. Counts toward VEH_Engine_SL_2's budget.",
+      "part_of": "VEH_Engine_SL_2"
     },
     "VEH_Engine_SL_3": {
       "name": "VEH_Engine_SL_3",
       "group": "VEH",
       "fbx": "export/fbx/VEH.fbx",
-      "triangles": 578,
+      "triangles": 360,
       "budget": 600,
       "pivot_m": [
         -0.5932,
@@ -12461,7 +12740,51 @@
             "Roughness": "export/textures/VEH_Engine_SL_Outer_Roughness.png",
             "Metalness": "export/textures/VEH_Engine_SL_Outer_Metalness.png"
           }
-        },
+        }
+      ],
+      "notes": "Nine objects share one mesh: _0 is the centre engine, _1.._8 sit on the r 1.55 ring at azimuth 22.5 + k*45. VEH_Engine_SL_k_Inner is the inner bell as its own part, for the firing glow; it shares the engine's pivot.",
+      "parts": [
+        "VEH_Engine_SL_3_Inner"
+      ],
+      "triangles_with_parts": 578
+    },
+    "VEH_Engine_SL_3_Inner": {
+      "name": "VEH_Engine_SL_3_Inner",
+      "group": "VEH",
+      "fbx": "export/fbx/VEH.fbx",
+      "triangles": 218,
+      "budget": null,
+      "pivot_m": [
+        -0.5932,
+        10.0,
+        1.432
+      ],
+      "pivot_studs": [
+        -2.118,
+        35.714,
+        5.114
+      ],
+      "bbox_min_studs": [
+        -4.065,
+        28.571,
+        3.168
+      ],
+      "bbox_max_studs": [
+        -0.172,
+        35.643,
+        7.061
+      ],
+      "size_studs": [
+        3.893,
+        7.071,
+        3.893
+      ],
+      "pivot_offset_studs": [
+        0.0,
+        3.607,
+        0.0
+      ],
+      "materials": [
         {
           "name": "VEH_Engine_SL_Inner",
           "maps": {
@@ -12472,13 +12795,14 @@
           }
         }
       ],
-      "notes": "Nine objects share one mesh: _0 is the centre engine, _1.._8 sit on the r 1.55 ring at azimuth 22.5 + k*45. The _Inner material is the inner bell for the firing glow."
+      "notes": "The inner material of VEH_Engine_SL_3 as its own part, since Roblox gives each MeshPart one material. Same pivot as VEH_Engine_SL_3: give it the same CFrame, or keep both in one Model. Counts toward VEH_Engine_SL_3's budget.",
+      "part_of": "VEH_Engine_SL_3"
     },
     "VEH_Engine_SL_4": {
       "name": "VEH_Engine_SL_4",
       "group": "VEH",
       "fbx": "export/fbx/VEH.fbx",
-      "triangles": 578,
+      "triangles": 360,
       "budget": 600,
       "pivot_m": [
         -1.432,
@@ -12519,7 +12843,51 @@
             "Roughness": "export/textures/VEH_Engine_SL_Outer_Roughness.png",
             "Metalness": "export/textures/VEH_Engine_SL_Outer_Metalness.png"
           }
-        },
+        }
+      ],
+      "notes": "Nine objects share one mesh: _0 is the centre engine, _1.._8 sit on the r 1.55 ring at azimuth 22.5 + k*45. VEH_Engine_SL_k_Inner is the inner bell as its own part, for the firing glow; it shares the engine's pivot.",
+      "parts": [
+        "VEH_Engine_SL_4_Inner"
+      ],
+      "triangles_with_parts": 578
+    },
+    "VEH_Engine_SL_4_Inner": {
+      "name": "VEH_Engine_SL_4_Inner",
+      "group": "VEH",
+      "fbx": "export/fbx/VEH.fbx",
+      "triangles": 218,
+      "budget": null,
+      "pivot_m": [
+        -1.432,
+        10.0,
+        0.5932
+      ],
+      "pivot_studs": [
+        -5.114,
+        35.714,
+        2.118
+      ],
+      "bbox_min_studs": [
+        -7.061,
+        28.571,
+        0.172
+      ],
+      "bbox_max_studs": [
+        -3.168,
+        35.643,
+        4.065
+      ],
+      "size_studs": [
+        3.893,
+        7.071,
+        3.893
+      ],
+      "pivot_offset_studs": [
+        0.0,
+        3.607,
+        0.0
+      ],
+      "materials": [
         {
           "name": "VEH_Engine_SL_Inner",
           "maps": {
@@ -12530,13 +12898,14 @@
           }
         }
       ],
-      "notes": "Nine objects share one mesh: _0 is the centre engine, _1.._8 sit on the r 1.55 ring at azimuth 22.5 + k*45. The _Inner material is the inner bell for the firing glow."
+      "notes": "The inner material of VEH_Engine_SL_4 as its own part, since Roblox gives each MeshPart one material. Same pivot as VEH_Engine_SL_4: give it the same CFrame, or keep both in one Model. Counts toward VEH_Engine_SL_4's budget.",
+      "part_of": "VEH_Engine_SL_4"
     },
     "VEH_Engine_SL_5": {
       "name": "VEH_Engine_SL_5",
       "group": "VEH",
       "fbx": "export/fbx/VEH.fbx",
-      "triangles": 578,
+      "triangles": 360,
       "budget": 600,
       "pivot_m": [
         -1.432,
@@ -12577,7 +12946,51 @@
             "Roughness": "export/textures/VEH_Engine_SL_Outer_Roughness.png",
             "Metalness": "export/textures/VEH_Engine_SL_Outer_Metalness.png"
           }
-        },
+        }
+      ],
+      "notes": "Nine objects share one mesh: _0 is the centre engine, _1.._8 sit on the r 1.55 ring at azimuth 22.5 + k*45. VEH_Engine_SL_k_Inner is the inner bell as its own part, for the firing glow; it shares the engine's pivot.",
+      "parts": [
+        "VEH_Engine_SL_5_Inner"
+      ],
+      "triangles_with_parts": 578
+    },
+    "VEH_Engine_SL_5_Inner": {
+      "name": "VEH_Engine_SL_5_Inner",
+      "group": "VEH",
+      "fbx": "export/fbx/VEH.fbx",
+      "triangles": 218,
+      "budget": null,
+      "pivot_m": [
+        -1.432,
+        10.0,
+        -0.5932
+      ],
+      "pivot_studs": [
+        -5.114,
+        35.714,
+        -2.118
+      ],
+      "bbox_min_studs": [
+        -7.061,
+        28.571,
+        -4.065
+      ],
+      "bbox_max_studs": [
+        -3.168,
+        35.643,
+        -0.172
+      ],
+      "size_studs": [
+        3.893,
+        7.071,
+        3.893
+      ],
+      "pivot_offset_studs": [
+        0.0,
+        3.607,
+        0.0
+      ],
+      "materials": [
         {
           "name": "VEH_Engine_SL_Inner",
           "maps": {
@@ -12588,13 +13001,14 @@
           }
         }
       ],
-      "notes": "Nine objects share one mesh: _0 is the centre engine, _1.._8 sit on the r 1.55 ring at azimuth 22.5 + k*45. The _Inner material is the inner bell for the firing glow."
+      "notes": "The inner material of VEH_Engine_SL_5 as its own part, since Roblox gives each MeshPart one material. Same pivot as VEH_Engine_SL_5: give it the same CFrame, or keep both in one Model. Counts toward VEH_Engine_SL_5's budget.",
+      "part_of": "VEH_Engine_SL_5"
     },
     "VEH_Engine_SL_6": {
       "name": "VEH_Engine_SL_6",
       "group": "VEH",
       "fbx": "export/fbx/VEH.fbx",
-      "triangles": 578,
+      "triangles": 360,
       "budget": 600,
       "pivot_m": [
         -0.5932,
@@ -12635,7 +13049,51 @@
             "Roughness": "export/textures/VEH_Engine_SL_Outer_Roughness.png",
             "Metalness": "export/textures/VEH_Engine_SL_Outer_Metalness.png"
           }
-        },
+        }
+      ],
+      "notes": "Nine objects share one mesh: _0 is the centre engine, _1.._8 sit on the r 1.55 ring at azimuth 22.5 + k*45. VEH_Engine_SL_k_Inner is the inner bell as its own part, for the firing glow; it shares the engine's pivot.",
+      "parts": [
+        "VEH_Engine_SL_6_Inner"
+      ],
+      "triangles_with_parts": 578
+    },
+    "VEH_Engine_SL_6_Inner": {
+      "name": "VEH_Engine_SL_6_Inner",
+      "group": "VEH",
+      "fbx": "export/fbx/VEH.fbx",
+      "triangles": 218,
+      "budget": null,
+      "pivot_m": [
+        -0.5932,
+        10.0,
+        -1.432
+      ],
+      "pivot_studs": [
+        -2.118,
+        35.714,
+        -5.114
+      ],
+      "bbox_min_studs": [
+        -4.065,
+        28.571,
+        -7.061
+      ],
+      "bbox_max_studs": [
+        -0.172,
+        35.643,
+        -3.168
+      ],
+      "size_studs": [
+        3.893,
+        7.071,
+        3.893
+      ],
+      "pivot_offset_studs": [
+        0.0,
+        3.607,
+        0.0
+      ],
+      "materials": [
         {
           "name": "VEH_Engine_SL_Inner",
           "maps": {
@@ -12646,13 +13104,14 @@
           }
         }
       ],
-      "notes": "Nine objects share one mesh: _0 is the centre engine, _1.._8 sit on the r 1.55 ring at azimuth 22.5 + k*45. The _Inner material is the inner bell for the firing glow."
+      "notes": "The inner material of VEH_Engine_SL_6 as its own part, since Roblox gives each MeshPart one material. Same pivot as VEH_Engine_SL_6: give it the same CFrame, or keep both in one Model. Counts toward VEH_Engine_SL_6's budget.",
+      "part_of": "VEH_Engine_SL_6"
     },
     "VEH_Engine_SL_7": {
       "name": "VEH_Engine_SL_7",
       "group": "VEH",
       "fbx": "export/fbx/VEH.fbx",
-      "triangles": 578,
+      "triangles": 360,
       "budget": 600,
       "pivot_m": [
         0.5932,
@@ -12693,7 +13152,51 @@
             "Roughness": "export/textures/VEH_Engine_SL_Outer_Roughness.png",
             "Metalness": "export/textures/VEH_Engine_SL_Outer_Metalness.png"
           }
-        },
+        }
+      ],
+      "notes": "Nine objects share one mesh: _0 is the centre engine, _1.._8 sit on the r 1.55 ring at azimuth 22.5 + k*45. VEH_Engine_SL_k_Inner is the inner bell as its own part, for the firing glow; it shares the engine's pivot.",
+      "parts": [
+        "VEH_Engine_SL_7_Inner"
+      ],
+      "triangles_with_parts": 578
+    },
+    "VEH_Engine_SL_7_Inner": {
+      "name": "VEH_Engine_SL_7_Inner",
+      "group": "VEH",
+      "fbx": "export/fbx/VEH.fbx",
+      "triangles": 218,
+      "budget": null,
+      "pivot_m": [
+        0.5932,
+        10.0,
+        -1.432
+      ],
+      "pivot_studs": [
+        2.118,
+        35.714,
+        -5.114
+      ],
+      "bbox_min_studs": [
+        0.172,
+        28.571,
+        -7.061
+      ],
+      "bbox_max_studs": [
+        4.065,
+        35.643,
+        -3.168
+      ],
+      "size_studs": [
+        3.893,
+        7.071,
+        3.893
+      ],
+      "pivot_offset_studs": [
+        0.0,
+        3.607,
+        0.0
+      ],
+      "materials": [
         {
           "name": "VEH_Engine_SL_Inner",
           "maps": {
@@ -12704,13 +13207,14 @@
           }
         }
       ],
-      "notes": "Nine objects share one mesh: _0 is the centre engine, _1.._8 sit on the r 1.55 ring at azimuth 22.5 + k*45. The _Inner material is the inner bell for the firing glow."
+      "notes": "The inner material of VEH_Engine_SL_7 as its own part, since Roblox gives each MeshPart one material. Same pivot as VEH_Engine_SL_7: give it the same CFrame, or keep both in one Model. Counts toward VEH_Engine_SL_7's budget.",
+      "part_of": "VEH_Engine_SL_7"
     },
     "VEH_Engine_SL_8": {
       "name": "VEH_Engine_SL_8",
       "group": "VEH",
       "fbx": "export/fbx/VEH.fbx",
-      "triangles": 578,
+      "triangles": 360,
       "budget": 600,
       "pivot_m": [
         1.432,
@@ -12751,7 +13255,51 @@
             "Roughness": "export/textures/VEH_Engine_SL_Outer_Roughness.png",
             "Metalness": "export/textures/VEH_Engine_SL_Outer_Metalness.png"
           }
-        },
+        }
+      ],
+      "notes": "Nine objects share one mesh: _0 is the centre engine, _1.._8 sit on the r 1.55 ring at azimuth 22.5 + k*45. VEH_Engine_SL_k_Inner is the inner bell as its own part, for the firing glow; it shares the engine's pivot.",
+      "parts": [
+        "VEH_Engine_SL_8_Inner"
+      ],
+      "triangles_with_parts": 578
+    },
+    "VEH_Engine_SL_8_Inner": {
+      "name": "VEH_Engine_SL_8_Inner",
+      "group": "VEH",
+      "fbx": "export/fbx/VEH.fbx",
+      "triangles": 218,
+      "budget": null,
+      "pivot_m": [
+        1.432,
+        10.0,
+        -0.5932
+      ],
+      "pivot_studs": [
+        5.114,
+        35.714,
+        -2.118
+      ],
+      "bbox_min_studs": [
+        3.168,
+        28.571,
+        -4.065
+      ],
+      "bbox_max_studs": [
+        7.061,
+        35.643,
+        -0.172
+      ],
+      "size_studs": [
+        3.893,
+        7.071,
+        3.893
+      ],
+      "pivot_offset_studs": [
+        0.0,
+        3.607,
+        0.0
+      ],
+      "materials": [
         {
           "name": "VEH_Engine_SL_Inner",
           "maps": {
@@ -12762,7 +13310,8 @@
           }
         }
       ],
-      "notes": "Nine objects share one mesh: _0 is the centre engine, _1.._8 sit on the r 1.55 ring at azimuth 22.5 + k*45. The _Inner material is the inner bell for the firing glow."
+      "notes": "The inner material of VEH_Engine_SL_8 as its own part, since Roblox gives each MeshPart one material. Same pivot as VEH_Engine_SL_8: give it the same CFrame, or keep both in one Model. Counts toward VEH_Engine_SL_8's budget.",
+      "part_of": "VEH_Engine_SL_8"
     },
     "VEH_Fairing_A": {
       "name": "VEH_Fairing_A",
@@ -13662,7 +14211,7 @@
       "name": "VEH_MVac",
       "group": "VEH",
       "fbx": "export/fbx/VEH.fbx",
-      "triangles": 798,
+      "triangles": 512,
       "budget": 800,
       "pivot_m": [
         0.0,
@@ -13703,7 +14252,54 @@
             "Roughness": "export/textures/VEH_MVac_Outer_Roughness.png",
             "Metalness": "export/textures/VEH_MVac_Outer_Metalness.png"
           }
-        },
+        }
+      ],
+      "notes": "VEH_MVac is the outside of the bell and the exit lip: a neutral dark grey for the heat ramp after ignition at T+127 (dark, dull orange, near white over 7 s). VEH_MVac_Inner, its own part with the same pivot, is the inside and the injector face. Hidden inside VEH_S1_Interstage until separation. UVs tile twice around (two-fold symmetric look).",
+      "texel_px_per_m": {
+        "0": 136.0
+      },
+      "parts": [
+        "VEH_MVac_Inner"
+      ],
+      "triangles_with_parts": 798
+    },
+    "VEH_MVac_Inner": {
+      "name": "VEH_MVac_Inner",
+      "group": "VEH",
+      "fbx": "export/fbx/VEH.fbx",
+      "triangles": 286,
+      "budget": null,
+      "pivot_m": [
+        0.0,
+        54.2,
+        0.0
+      ],
+      "pivot_studs": [
+        0.0,
+        193.571,
+        0.0
+      ],
+      "bbox_min_studs": [
+        -4.034,
+        181.071,
+        -4.034
+      ],
+      "bbox_max_studs": [
+        4.034,
+        193.571,
+        4.034
+      ],
+      "size_studs": [
+        8.067,
+        12.5,
+        8.067
+      ],
+      "pivot_offset_studs": [
+        0.0,
+        6.25,
+        0.0
+      ],
+      "materials": [
         {
           "name": "VEH_MVac_Inner",
           "maps": {
@@ -13714,11 +14310,11 @@
           }
         }
       ],
-      "notes": "_Outer is the outside of the bell and the exit lip: a neutral dark grey for the heat ramp after ignition at T+127 (dark, dull orange, near white over 7 s). _Inner is the inside and the injector face. Hidden inside VEH_S1_Interstage until separation. UVs tile twice around (two-fold symmetric look).",
+      "notes": "The inner material of VEH_MVac as its own part, since Roblox gives each MeshPart one material. Same pivot as VEH_MVac: give it the same CFrame, or keep both in one Model. Counts toward VEH_MVac's budget.",
       "texel_px_per_m": {
-        "0": 136.0,
-        "1": 59.5
-      }
+        "0": 59.5
+      },
+      "part_of": "VEH_MVac"
     },
     "VEH_S1_Body": {
       "name": "VEH_S1_Body",

@@ -1,5 +1,5 @@
-# Only finished products are versioned: the meshes, textures and manifest in export/.
-# The Blender pipeline, its caches and the review renders stay local.
+# export/ holds only finished meshes, textures and the manifest. The Blender pipeline, its caches,
+# the review renders and the mood-study reference frames stay local.
 /blender/
 /previews/
 /export/manifest.d/

@@ -4,6 +4,15 @@ Newest first. One line of reason each.
 
 ## 2026-11-08
 
+- **Split the 13 two-material meshes into one object per material before upload, rather than patch them in
+  Studio.** A MeshPart renders only one SurfaceAppearance, and the effects need those surfaces separate anyway:
+  bell glow, nozzle heat ramp, paint tints, lit lenses.
+- **Re-upload a fixed FBX as a new revision of its existing asset, not as a new asset.** Assets are permanent, and
+  one asset per group keeps the account clean.
+- **Place attachments and hinges from the manifest's world positions, not `local_studs`.** Imported part frames
+  are turned 180° about Y from the table axes, so local offsets would land mirrored.
+- **Keep `tools/manifest_to_luau.py` as the single path from the manifest into Studio code.** The pilot's checks
+  needed the same pivots, boxes and attachments that SceneBuilder will.
 - **Skip the port guide's blockout and prove camera framing with the real meshes.** The blockout protected the
   modelling time, and the modelling is already done.
 - **Import through Open Cloud uploads over MCP, piloted on VEH.fbx, instead of the 3D Importer by hand.** I can

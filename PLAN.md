@@ -63,6 +63,22 @@ The vehicle is in every shot and is the smallest file with the most moving parts
 If the pilot loses textures or names wholesale, Eli runs Studio's 3D Importer on the four files instead (the
 README's steps, about 10 minutes). I then do the same verification and repair.
 
+**Pilot result, Nov 8 (asset 130623056517308, inserted as `Workspace.VEH_Pilot`):**
+
+- Kept: all 23 names, every single-material SurfaceAppearance with the right maps, and every pivot.
+- Fixed in Studio: the model arrives at 1 stud per metre and yawed about 135°. `PivotTo` the origin with a 180°
+  yaw plus `ScaleTo(1 / 0.28)` puts every part within 0.001 studs of the manifest's position, size and pivot.
+  Nozzle exits sit at 28.57 studs and the fairing tip at 272.68. The 28 attachments, Precise and Box are in.
+- Part frames come in turned 180° about Y from the table axes. So attachments and hinges are placed from the
+  manifest's world positions, not from `local_studs`.
+- **Broken: two-material meshes.** The importer doesn't split them. Each one becomes a single MeshPart with two
+  SurfaceAppearances, the second empty, and a MeshPart renders only one. On the engines and MVac, the surviving
+  map is the 256 px inner soot set, so the outer bells wear the wrong material. The same will hit `SITE_Car`,
+  `SITE_FloodPole` and `SITE_Hangar` (13 meshes in all).
+- Fix: split those 13 meshes in Blender into one object per material (`<name>` and `<name>_Inner`, `_Paint`,
+  `_Lens`, `_Door`). Re-export VEH.fbx and SITE.fbx, then upload VEH as a new revision of the same asset, not a
+  new one.
+
 ### 2. Import PAD, TWR, SITE
 
 Same flow and checks. SITE.fbx is 17.3 MB, under the 20 MB upload cap. The importer splits multi-material meshes
@@ -135,8 +151,8 @@ mid-range laptop, and Eli looking at the flame and glows on a real phone.
 
 ## Risks to retire early
 
-- **Import fidelity.** Whether an Open Cloud FBX upload keeps names, pivots and embedded maps is unknown. The VEH
-  pilot answers it before the big files go up.
+- **Import fidelity.** Answered by the VEH pilot: names, pivots and single-material maps survive. Scale and yaw
+  are fixed by script, and two-material meshes must be split before upload (phase 1).
 - **Far geometry.** Tree tiles sit up to 23,800 studs out and Cam 2 at about 40,000. Position jitter and
   distance culling show up in the phase 3 stills; the guide's altitude set already covers the flight.
 - **Phone budget.** About 342,000 triangles as placed, 1,600 vegetation instances, then particles on top. Shared

@@ -5,6 +5,12 @@ Items marked **BLOCKING** stop a whole phase.
 
 ## 2026-11-08
 
+0. **BLOCKING phases 1–2: split 13 meshes by material.** The VEH pilot showed that two-material meshes import as
+   a single MeshPart that shows only one material (details in `PLAN.md`, phase 1). Blender isn't on this Mac,
+   and the export pipeline (`/blender/`) isn't in the repo. Either run the split where the pipeline lives, or OK
+   me to install Blender with Homebrew and do it here.
+   Items 1 and 2 below are done (the VEH upload went through on Nov 8).
+
 1. **BLOCKING the import: approve the upload folder.** In Studio, go to Assistant Settings, then MCP Permissions,
    and approve `/Users/eli/projects/roblox/roblox-space-tycoon/export`. Why: Open Cloud uploads only read files
    from approved folders. Needed before phase 1.

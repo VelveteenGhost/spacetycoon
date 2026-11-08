@@ -48,6 +48,10 @@ Each phase ends on a check, and the next one starts only after it passes.
   T-times, plus the static-fire still. They go in `previews/reference/`, which git ignores. They're the target
   for every check from phase 3 on.
 
+**Progress, Nov 8:** StreamingEnabled and CharacterAutoLoads are off, the Baseplate and SpawnLocation are gone,
+`ServerStorage.PortTemplates` exists for the repeated SITE props, and the manifest module is generated. Writing
+`Lighting.Technology` from a script is confirmed blocked (Eli sets it). Reference frames are still to do.
+
 ### 1. Import pilot: VEH.fbx
 
 The vehicle is in every shot and is the smallest file with the most moving parts, so it goes first.
@@ -81,9 +85,12 @@ README's steps, about 10 minutes). I then do the same verification and repair.
 
 ### 2. Import PAD, TWR, SITE
 
-Same flow and checks. SITE.fbx is 17.3 MB, under the 20 MB upload cap. The importer splits multi-material meshes
-(car paint, flood lenses, inner engine bells, hangar door), so the check counts parts per manifest material, not
-per mesh.
+Same flow and checks, run by `tools/import_fix.py <GROUP> <path>`. SITE.fbx is 17.3 MB, under the 20 MB upload
+cap, and waits for the split re-export.
+
+**Progress, Nov 8:** PAD (138977096256584) and TWR (86272731500333) are uploaded and verified: every mesh is within
+0.004 studs of the manifest, with one SurfaceAppearance each. VEH, PAD and TWR sit in `Workspace.Port` at their
+table positions. Asset IDs are tracked in `ASSETS.md`.
 
 ### 3. Scene assembly
 

@@ -1,0 +1,7 @@
+# Only finished products are versioned: the meshes, textures and manifest in export/.
+# The Blender pipeline, its caches and the review renders stay local.
+/blender/
+/previews/
+/export/manifest.d/
+__pycache__/
+.DS_Store

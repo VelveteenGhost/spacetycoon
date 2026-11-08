@@ -6,10 +6,10 @@ coordinates: origin at the pad centre on the ground, +X east toward the ocean, Y
 
 | Path | What |
 | --- | --- |
-| `fbx/VEH.fbx` | `VEH_S1_Body`, `VEH_Engine_SL_0`–`8`, `VEH_S1_Interstage`, `VEH_GridFin_0`–`3`, `VEH_Leg_0`–`3`, `VEH_S2_Body`, `VEH_MVac`, `VEH_Fairing_A`/`B` |
+| `fbx/VEH.fbx` | `VEH_S1_Body`, `VEH_Engine_SL_0`–`8` with `VEH_Engine_SL_0_Inner`–`8_Inner`, `VEH_S1_Interstage`, `VEH_GridFin_0`–`3`, `VEH_Leg_0`–`3`, `VEH_S2_Body`, `VEH_MVac` with `VEH_MVac_Inner`, `VEH_Fairing_A`/`B` |
 | `fbx/PAD.fbx` | `PAD_Mount`, `PAD_Apron`, `PAD_Apron_Centre`, `PAD_Apron_Asphalt`, `PAD_Clamp_0`–`3`, `PAD_Deflector`, `PAD_Trench`, `PAD_Lines` |
 | `fbx/TWR.fbx` | `TWR_Lattice_A`/`B`/`C`, `TWR_CrewArm`, `TWR_FuelArm` |
-| `fbx/SITE.fbx` | `SITE_` masts, flood pole, water tower, spheres, tanks, hangar, range ops, car, fence post, power pole, distant pad, flag with `SITE_Flag_Rig`; `VEG_Scrub_A`–`C`, `VEG_Palmetto_A`/`B`, `VEG_TreeClump_A`–`C`, `VEG_Belt_0`–`183` |
+| `fbx/SITE.fbx` | `SITE_` masts, flood pole with `SITE_FloodPole_Lens`, water tower, spheres, tanks, hangar with `SITE_Hangar_Door`, range ops, car with `SITE_Car_Paint`, fence post, power pole, distant pad, flag with `SITE_Flag_Rig`; `VEG_Scrub_A`–`C`, `VEG_Palmetto_A`/`B`, `VEG_TreeClump_A`–`C`, `VEG_Belt_0`–`183` |
 | `textures/` | `<Material>_<Color/Normal/Roughness/Metalness>.png` for SurfaceAppearance, at most 1024 px. Color is sRGB; Normal (OpenGL, +Y), Roughness and Metalness are linear |
 | `manifest.json` | Per mesh: triangles and budget, pivot, size, `pivot_offset_studs`, materials and maps, attachments, placement notes |
 
@@ -35,13 +35,21 @@ origin, and their `notes` give the placement rule: `SITE_Mast` ×3, `SITE_FloodP
 `VEG_Palmetto` instances (the rule is in `VEG_Scrub_A`'s notes). The mood study's 3,600 trees are already in
 the `VEG_Belt` tiles; `VEG_TreeClump_A`–`C` are for trees placed by hand near the cameras.
 
+Every object carries one material, because Roblox gives each MeshPart only one. Five meshes therefore ship
+as two parts that share the original origin: `VEH_Engine_SL_<k>` and `VEH_Engine_SL_<k>_Inner` (the inner
+bell, for the firing glow), `VEH_MVac` and `VEH_MVac_Inner`, `SITE_Car` and `SITE_Car_Paint`,
+`SITE_FloodPole` and `SITE_FloodPole_Lens`, `SITE_Hangar` and `SITE_Hangar_Door`. Give both parts of a pair
+the same CFrame, or keep them in one Model; gimbals, hinges and placement rules are unchanged. In the
+manifest, `parts` and `part_of` link each pair, attachments stay on the main part, and `triangles_with_parts`
+is the count the budget applies to.
+
 ## Studio checks
 
 - `SITE_Flag`: DoubleSided on. `SITE_Flag_Rig` (Root, Fly0–Fly5) imports with it; drive the Fly bones with a
   travelling sine wave while Cam 6 is live.
 - `VEH_Fairing_A` and `_B`: DoubleSided on when they open, since their insides show.
-- `SITE_Car` imports as two MeshParts. Tint `SITE_Car_Paint` with `SurfaceAppearance.Color`; the six paints
-  and the per-car mix are in its notes.
+- Tint `SITE_Car_Paint` with `SurfaceAppearance.Color`; the six paints and the per-car mix are in
+  `SITE_Car`'s notes.
 - `SITE_FloodPole_Lens` is drawn lit. By day set its `SurfaceAppearance.Color` to #3b3e43; restore white at
   night.
 - Fence rails, power conductors and mast wires are Beams between the manifest attachments. Widths and sags

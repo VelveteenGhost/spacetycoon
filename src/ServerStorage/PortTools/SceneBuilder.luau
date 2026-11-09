@@ -440,9 +440,71 @@ local function buildCoast()
 	end
 end
 
+-- Floodlights (PLAN.md phase 5). Roblox lights reach at most 120 studs (34 m), and the mood study's floods sit
+-- 49 m from the vehicle, so each pole's SpotLight moves in along its own beam to 30 m out; the poles stay as props.
+-- A warm SurfaceLight under each pole makes the pool on the apron. Look sets their brightness by sun elevation,
+-- from the Brightness attribute at full flood.
+-- The floods. The mood study throws one wide cone per pole over the vehicle, the mount and the apron, but a Roblox
+-- light reaches 120 studs (34 m) at most and has little left near the end of its range, so each pole gets three cones
+-- from 16-18 m out, on the line from its lamps (the upper vehicle, the middle, and the lower vehicle with the mount),
+-- plus a pool light over the apron. Look sets their brightness from the Brightness attributes. Realistic lighting is
+-- steep: these are matched to the mood study's blue hour on the mount shot at quality level 15 (Nov 9).
+local FLOOD_CONES = {
+	{ name = "Upper", target = Vector3.new(0, 52, 0), dist = 16, angle = 90, brightness = 0.08, shadows = false },
+	{ name = "Mid", target = Vector3.new(0, 30, 0), dist = 16, angle = 90, brightness = 0.08, shadows = false },
+	{ name = "Lower", target = Vector3.new(0, 10, 0), dist = 18, angle = 100, brightness = 0.35, shadows = true },
+}
+local function lightHolder(name, cf, rig)
+	local holder = Instance.new("Part")
+	holder.Name = name
+	holder.Size = Vector3.new(0.4, 0.4, 0.4)
+	holder.Transparency = 1
+	holder.Anchored, holder.CanCollide, holder.CanTouch, holder.CanQuery = true, false, false, false
+	holder.CastShadow = false
+	holder.CFrame = cf
+	holder.Parent = rig
+	return holder
+end
+local function buildLights()
+	local rig = folder("Lights", port)
+	for i, p in FLOOD_POLES do
+		local lamp = Vector3.new(p[1], 22.4, p[2])
+		for _, cone in FLOOD_CONES do
+			local pos = cone.target + (lamp - cone.target).Unit * cone.dist
+			local holder = lightHolder("Flood" .. cone.name .. i, CFrame.lookAt(pos * S, cone.target * S), rig)
+			local spot = Instance.new("SpotLight")
+			spot.Face = Enum.NormalId.Front
+			spot.Range = 120
+			spot.Angle = cone.angle
+			spot.Color = Color3.new(1, 0.9, 0.74)
+			spot.Shadows = cone.shadows and i <= 2 -- two shadow casters, as in the mood study
+			spot:SetAttribute("Brightness", cone.brightness)
+			spot.Parent = holder
+		end
+		-- the apron pool, high enough that its 120-stud reach covers the mood study's 52 m glow
+		local pool = lightHolder("FloodPool" .. i, CFrame.new(p[1] * 0.78 * S, 12 * S, p[2] * 0.78 * S), rig)
+		local surface = Instance.new("SurfaceLight")
+		surface.Face = Enum.NormalId.Bottom
+		surface.Range = 120
+		surface.Angle = 150
+		surface.Color = Color3.new(1, 0.9, 0.74)
+		surface.Shadows = false
+		surface:SetAttribute("Brightness", 0.6)
+		surface.Parent = pool
+	end
+end
+SceneBuilder.buildLights = function()
+	port = Workspace:WaitForChild("Port")
+	local old = port:FindFirstChild("Lights")
+	if old then
+		old:Destroy()
+	end
+	buildLights()
+end
+
 function SceneBuilder.clear()
 	port = Workspace:WaitForChild("Port")
-	for _, name in { "Ground" } do
+	for _, name in { "Ground", "Lights" } do
 		local old = port:FindFirstChild(name)
 		if old then
 			old:Destroy()
@@ -473,6 +535,7 @@ function SceneBuilder.build(opts)
 	local near = buildVegetation()
 	status("ground")
 	buildGround()
+	buildLights()
 	if opts.coast ~= false then
 		status("coast: dune and beach")
 		buildCoast()

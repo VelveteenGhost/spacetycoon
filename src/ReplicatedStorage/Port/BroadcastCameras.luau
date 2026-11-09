@@ -8,16 +8,18 @@ local smooth = Flight.smooth
 local Cams = {}
 
 Cams.LIST = { "onboard", "mount", "pad", "drone", "long", "press", "coast", "wide", "tracker" }
+-- fog: the shot's haze multiplier (the mood study retunes haze per camera, as a cutscene retunes Atmosphere);
+-- prox: how much the engine glare stops the camera down
 Cams.CAMS = {
-	onboard = { fov = 96, label = "Cam 12 · Onboard", shake = 0.32, prox = 0.8 },
-	mount = { fov = 42, label = "Cam 9 · Launch mount", shake = 1, prox = 1 },
-	pad = { fov = 38, label = "Cam 7 · Pad perimeter", shake = 0.5, prox = 1 },
-	drone = { fov = 16, label = "Cam 3 · Aerial", shake = 0.03, prox = 0.6 },
-	long = { fov = 4.4, label = "Cam 1 · Long lens", shake = 0.06, prox = 0.5 },
-	press = { fov = 14, label = "Cam 6 · Press site", shake = 0, prox = 0.35 },
-	coast = { fov = 6, label = "Cam 5 · Coastline, 3 km", shake = 0, prox = 0.35 },
-	wide = { fov = 8, label = "Cam 4 · Wide, 4 km", shake = 0, prox = 0.3 },
-	tracker = { fov = 2, label = "Cam 2 · Tracker, 11 km", shake = 0, prox = 0.25 },
+	onboard = { fov = 96, label = "Cam 12 · Onboard", shake = 0.32, prox = 0.8, fog = 1 },
+	mount = { fov = 42, label = "Cam 9 · Launch mount", shake = 1, prox = 1, fog = 1 },
+	pad = { fov = 38, label = "Cam 7 · Pad perimeter", shake = 0.5, prox = 1, fog = 1 },
+	drone = { fov = 16, label = "Cam 3 · Aerial", shake = 0.03, prox = 0.6, fog = 1 },
+	long = { fov = 4.4, label = "Cam 1 · Long lens", shake = 0.06, prox = 0.5, fog = 1 },
+	press = { fov = 14, label = "Cam 6 · Press site", shake = 0, prox = 0.35, fog = 0.45 },
+	coast = { fov = 6, label = "Cam 5 · Coastline, 3 km", shake = 0, prox = 0.35, fog = 0.45 },
+	wide = { fov = 8, label = "Cam 4 · Wide, 4 km", shake = 0, prox = 0.3, fog = 0.4 },
+	tracker = { fov = 2, label = "Cam 2 · Tracker, 11 km", shake = 0, prox = 0.25, fog = 0.25 },
 }
 
 Cams.CUTS = {

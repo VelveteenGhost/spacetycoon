@@ -19,6 +19,8 @@ local Flight = require(Port:WaitForChild("Flight"))
 local Cams = require(Port:WaitForChild("BroadcastCameras"))
 local Hud = require(Port:WaitForChild("Hud"))
 local FarProxy = require(Port:WaitForChild("FarProxy"))
+local Look = require(Port:WaitForChild("Look"))
+local Glows = require(Port:WaitForChild("Glows"))
 
 local S = 1 / 0.28
 local PAD_SET_END = 34 -- the launch loops here until the altitude set (phase 7) takes over at about T+25
@@ -85,7 +87,9 @@ local proxy = FarProxy.new({
 	{ model = site:WaitForChild("Belts"), name = "Belts" },
 	{ model = site:WaitForChild("Flag"), name = "Flag" },
 	{ model = port:WaitForChild("Ground"):WaitForChild("ServiceBuildings"), name = "ServiceBuildings" },
+	{ model = port:WaitForChild("Lights"), name = "Lights" },
 })
+local glows = Glows.new(port)
 
 -- Thrust history: sound and shake reach each camera at the speed of sound.
 local hist = {}
@@ -116,16 +120,37 @@ end
 local st = Flight.new("launch")
 local rig = Cams.new()
 local autoCam, overlayOn, paused = true, true, false
+local sunPreset, wxPreset = "sunrise", "clear"
+local lookKey, lookT, floodKey = "", 0, ""
 local t, holdT, hudT, countdown = 0, 0, 1, 34 * 60 + 12
 local cutAlpha = 0
 local hud
+
+local function refreshDeck()
+	hud:setDeck(st.mode, autoCam, sunPreset, wxPreset)
+end
 
 local function startSeq(mode)
 	st = Flight.new(mode)
 	hist = {}
 	rig.aimSnap = true
 	holdT = 0
-	hud:setDeck(mode, autoCam)
+	refreshDeck()
+end
+
+local function setSun(name)
+	if Look.PRESETS[name] then
+		sunPreset, lookKey = name, ""
+		refreshDeck()
+	end
+end
+
+local function setSky(name)
+	if Look.WX[name] then
+		wxPreset, lookKey = name, ""
+		hud:setVisibility(Look.VIS[name])
+		refreshDeck()
+	end
 end
 
 local function seek(target)
@@ -141,7 +166,7 @@ local function setCamera(mode)
 	if not autoCam then
 		Cams.set(rig, mode)
 	end
-	hud:setDeck(st.mode, autoCam)
+	refreshDeck()
 end
 
 local function nextCamera()
@@ -164,8 +189,10 @@ hud = Hud.new(Players.LocalPlayer:WaitForChild("PlayerGui"), {
 		end
 	end,
 	onToggleOverlay = toggleOverlay,
+	onSun = setSun,
+	onSky = setSky,
 })
-hud:setDeck(st.mode, autoCam)
+refreshDeck()
 
 UserInputService.InputBegan:Connect(function(input, processed)
 	if processed then
@@ -204,6 +231,12 @@ port:GetAttributeChangedSignal("SeekT"):Connect(function()
 	if typeof(target) == "number" and st.mode ~= "hold" then
 		seek(target)
 	end
+end)
+port:GetAttributeChangedSignal("Sun"):Connect(function()
+	setSun(port:GetAttribute("Sun"))
+end)
+port:GetAttributeChangedSignal("Sky"):Connect(function()
+	setSky(port:GetAttribute("Sky"))
 end)
 port:GetAttributeChangedSignal("Paused"):Connect(function()
 	paused = port:GetAttribute("Paused") == true
@@ -265,6 +298,36 @@ RunService:BindToRenderStep("PortDirector", Enum.RenderPriority.Camera.Value + 1
 	if rig.mode == "press" then
 		waveFlag(t)
 	end
+
+	-- look: a full re-apply when the sun, sky, shot or proxy changes, and a few times a second for the haze thinning
+	-- with altitude; the exposure dip follows the engines every frame
+	local cc = Cams.CAMS[rig.mode]
+	local key = sunPreset .. wxPreset .. rig.mode .. tostring(proxy.active)
+	lookT += rawDt
+	if key ~= lookKey or lookT > 0.25 then
+		lookKey, lookT = key, 0
+		local flood = Look.apply({
+			sun = sunPreset,
+			elev = Look.PRESETS[sunPreset],
+			wx = wxPreset,
+			camFog = cc.fog,
+			alt = st.alt,
+			dip = heard * cc.prox,
+			proxy = proxy.active,
+		})
+		local fk = string.format("%.3f", flood) .. tostring(proxy.active)
+		if fk ~= floodKey then
+			floodKey = fk
+			if proxy.active then
+				Look.setFloods(flood, { proxy.root }, { port })
+			else
+				Look.setFloods(flood, { port }, { proxy.root })
+			end
+		end
+	else
+		Look.setExposure(Look.PRESETS[sunPreset], wxPreset, heard * cc.prox)
+	end
+	glows:update(t, camera.CFrame.Position, proxy.active and proxy.scale or nil, Look.flood, Look.elev, Look.fogDensity)
 
 	-- HUD
 	hud:layout(vp)

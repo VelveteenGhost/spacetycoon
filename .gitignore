@@ -5,3 +5,5 @@
 /export/manifest.d/
 __pycache__/
 .DS_Store
+# Roblox-ready sky faces are build output of tools/sky_faces.py
+/art/sky/*/roblox/

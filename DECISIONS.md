@@ -2,6 +2,28 @@
 
 Newest first. One line of reason each.
 
+## 2026-11-09
+
+- **Bake the mood study's sky into a Roblox skybox per look (sunrise, morning, blue hour × clear, marine), and
+  divide out Roblox's own sky tint.** Roblox's sky can't make the reference's teal-grey dawn. It also multiplies any
+  skybox by a tint that follows the sun (neutral above about +12°, olive and 4× darker at +3°, 40× darker and
+  nearly blue-free below the horizon) and by the scene exposure, so `tools/sky_faces.py` scales each texel by
+  K / (tint(elevation) × 2^exposure). Broken weather uses the clear sky under Roblox's clouds.
+- **At blue hour Roblox's sun waits at the morning angle with Brightness 0, the Atmosphere comes out, and plain
+  distance fog stands in.** Below the horizon the sky tint is past what a texture can undo, and from the parked
+  angle Atmosphere would scatter daylight into the sky and haze. The far shots lose some haze at night, where
+  it matters least.
+- **Treat ColorShift_Top as a shift, not a multiplier: (1, 0.3, 0.1) at sunrise, easing to (0.45, 0.35, 0.25) by
+  +18°.** Under Realistic lighting it shifts Roblox's olive low sun; this pair matches the mood study's peach on
+  the mount shot.
+- **Floods: three cones per pole from 16–18 m plus an apron pool, tuned at quality level 15.** A Roblox light has
+  little left near its 120-stud reach, so cones from the poles' real 48 m lit nothing. Light response differs by
+  quality level, so the tuning names its level.
+- **The far-camera copy carries the lights too, at a 5-stud minimum range and 6× brightness.** Lights scaled to a
+  couple of studs draw nothing, and the floods are what the far shots see at night.
+- **Glows are BillboardGuis on Terrain attachments, placed each frame in real or copy space.** One set serves
+  every camera without copying billboards into the proxy.
+
 ## 2026-11-08
 
 - **The far-camera copy includes the ground (flat bands with a hole around the camera) and everything that stands

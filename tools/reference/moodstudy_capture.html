@@ -1845,6 +1845,50 @@ window.__cap = {
              pos: camera.position.toArray(), aim: aim.toArray(), fov: camera.fov, aspect: camera.aspect,
              quat: camera.quaternion.toArray(), near: camera.near, far: camera.far, thrust, PR };
   },
+  // sky bake (bake_sky.py): set a look the way the deck's sun slider and weather buttons do, and report the sky parameters
+  setLook(e, w){
+    if (!WX[w]) throw new Error('unknown weather ' + w);
+    setWx(w); sunInput.value = String(e); onSun(); refreshEnv();
+    if (elev !== e) throw new Error(`sun slider gave ${elev}, wanted ${e}`);
+    const u = sky.material.uniforms, g = grade.uniforms;
+    return { elev, wx, baseExposure, gradeOn, sunDir: sunDir.toArray(),
+             turbidity: u.turbidity.value, rayleigh: u.rayleigh.value, mieCoefficient: u.mieCoefficient.value, mieDirectionalG: u.mieDirectionalG.value,
+             contrast: g.contrast.value, saturation: g.saturation.value, tint: g.tint.value.toArray(), lift: g.lift.value.toArray() };
+  },
+  // sky bake: render the sky alone (no other objects, no fog, no bloom) from (0, 2, 0) into six square 90° cube faces, through
+  // a copy of the grade pass at this look's baseExposure with vignette, grain and sun glare off (screen-space, they'd seam).
+  // Returns PNG data URLs; the top-down RGBA pixels stay in window.__skyBake for checks.
+  bakeSky(size = 1024){
+    const FACES = { Ft:[[0,0,-1],[0,1,0]], Bk:[[0,0,1],[0,1,0]], Lf:[[-1,0,0],[0,1,0]], Rt:[[1,0,0],[0,1,0]], Up:[[0,1,0],[0,0,-1]], Dn:[[0,-1,0],[0,0,1]] };
+    const cam = new THREE.PerspectiveCamera(90, 1, 1, 60000); cam.position.set(0, 2, 0);
+    const hdr = new THREE.WebGLRenderTarget(size, size, { type:THREE.HalfFloatType }), ldr = new THREE.WebGLRenderTarget(size, size);
+    const pass = new THREE.ShaderPass({ uniforms:grade.uniforms, vertexShader:grade.material.vertexShader, fragmentShader:grade.material.fragmentShader });
+    const pu = pass.uniforms;   // cloned from the live grade: contrast, saturation, tint and lift carry over
+    pu.exposure.value = baseExposure; pu.vignette.value = 0; pu.grain.value = 0; pu.sunVis.value = 0; pu.aspect.value = 1; pu.time.value = 0;
+    const vis = scene.children.map(o => o.visible), fog = scene.fog, skyPos = sky.position.clone(), prevRT = renderer.getRenderTarget();
+    scene.children.forEach(o => { o.visible = o === sky; }); scene.fog = null; sky.position.copy(cam.position);
+    const buf = new Uint8Array(size*size*4), row = size*4, pixels = {}, png = {};
+    try {
+      for (const [name, [f, up]] of Object.entries(FACES)){
+        cam.up.set(up[0], up[1], up[2]); cam.lookAt(cam.position.x + f[0], cam.position.y + f[1], cam.position.z + f[2]); cam.updateMatrixWorld();
+        renderer.setRenderTarget(hdr); renderer.clear(); renderer.render(scene, cam);
+        pass.render(renderer, ldr, hdr);
+        renderer.readRenderTargetPixels(ldr, 0, 0, size, size, buf);
+        const px = new Uint8ClampedArray(size*size*4);
+        for (let y = 0; y < size; y++) px.set(buf.subarray((size - 1 - y)*row, (size - y)*row), y*row);   // GL rows run bottom-up
+        pixels[name] = px;
+        const cv = document.createElement('canvas'); cv.width = cv.height = size;
+        cv.getContext('2d').putImageData(new ImageData(px, size, size), 0, 0);
+        png[name] = cv.toDataURL('image/png');
+      }
+    } finally {
+      scene.children.forEach((o, i) => { o.visible = vis[i]; }); scene.fog = fog; sky.position.copy(skyPos);
+      renderer.setRenderTarget(prevRT); hdr.dispose(); ldr.dispose(); pass.material.dispose();
+    }
+    window.__skyBake = { size, elev, wx, sunDir: sunDir.toArray(), faces: pixels, axes: FACES };
+    return { png, exposure: pu.exposure.value, contrast: pu.contrast.value, saturation: pu.saturation.value,
+             tint: pu.tint.value.toArray(), lift: pu.lift.value.toArray(), vignette: pu.vignette.value, grain: pu.grain.value };
+  },
 };
 requestAnimationFrame(frame);
 })();

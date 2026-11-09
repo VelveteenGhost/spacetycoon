@@ -158,7 +158,7 @@ function Hud.new(playerGui, callbacks)
 	self.kicker = text(lower, 12, BOLD, TALLY, 1)
 	self.main = text(lower, 30, BOLD, INK, 2)
 	self.meta = text(lower, 12, MEDIUM, DIM, 3)
-	self.meta.Text = "PAD 2, KESTREL POINT     WIND 7 KT SSE     18 °C     VIS 9 SM"
+	self:setVisibility("VIS 9 SM")
 
 	-- bottom right: control deck
 	local deck = new("Frame", {
@@ -203,9 +203,15 @@ function Hud.new(playerGui, callbacks)
 	button("hold", "PROP LOAD", 1, function() callbacks.onSequence("hold") end)
 	button("static", "STATIC FIRE", 2, function() callbacks.onSequence("static") end)
 	button("launch", "LAUNCH", 3, function() callbacks.onSequence("launch") end)
-	button("auto", "AUTO CAM", 4, function() callbacks.onCamera("auto") end)
-	button("next", "NEXT CAM", 5, function() callbacks.onCamera("next") end)
-	button("hide", "HIDE", 6, function() callbacks.onToggleOverlay() end)
+	button("blue", "BLUE HOUR", 4, function() callbacks.onSun("blue") end)
+	button("sunrise", "SUNRISE", 5, function() callbacks.onSun("sunrise") end)
+	button("morning", "MORNING", 6, function() callbacks.onSun("morning") end)
+	button("clear", "CLEAR", 7, function() callbacks.onSky("clear") end)
+	button("broken", "BROKEN", 8, function() callbacks.onSky("broken") end)
+	button("marine", "MARINE", 9, function() callbacks.onSky("marine") end)
+	button("auto", "AUTO CAM", 10, function() callbacks.onCamera("auto") end)
+	button("next", "NEXT CAM", 11, function() callbacks.onCamera("next") end)
+	button("hide", "HIDE", 12, function() callbacks.onToggleOverlay() end)
 	return self
 end
 
@@ -216,14 +222,18 @@ function Hud:layout(viewport)
 	self.deckScale.Scale = math.max(s, 0.75) -- keep buttons tappable on phones
 end
 
-function Hud:setDeck(seqMode, auto)
+function Hud:setDeck(seqMode, auto, sun, sky)
 	for key, b in self.buttons do
-		local on = key == seqMode or (key == "auto" and auto)
+		local on = key == seqMode or (key == "auto" and auto) or key == sun or key == sky
 		b.BackgroundTransparency = on and 0.84 or 1
 		b.TextColor3 = on and INK or DIM
 		b:FindFirstChildOfClass("UIStroke").Color = on and TALLY or INK
 		b:FindFirstChildOfClass("UIStroke").Transparency = on and 0 or 0.78
 	end
+end
+
+function Hud:setVisibility(vis)
+	self.meta.Text = "PAD 2, KESTREL POINT     WIND 7 KT SSE     18 °C     " .. vis
 end
 
 function Hud:setOverlayVisible(on)

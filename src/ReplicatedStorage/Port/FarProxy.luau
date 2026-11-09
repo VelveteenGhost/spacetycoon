@@ -19,6 +19,8 @@ FarProxy.FAR = 700 -- studs: the copy's farthest site content sits this far from
 FarProxy.NEAR = 800 -- studs: cameras closer than this to the pad see the real site
 FarProxy.HOLE = 400 -- studs: the real ground stays real within this half-width square around the camera
 local RESCALE = 0.2 -- rescale only when the ideal scale drifts by this fraction (sizes are costly to rewrite)
+local MIN_LIGHT_RANGE = 5 -- studs: Roblox draws nothing from a light with a range of a couple of studs (Nov 9)
+local PROXY_LIGHT_GAIN = 6 -- the copy's floods, reaching only a few studs, need this much more to read from afar
 local S = 1 / 0.28
 
 -- Ground bands along x, table metres, matching SceneBuilder's land, beach and sea; they span z +-40 km. Smooth
@@ -42,7 +44,7 @@ function FarProxy.new(sources)
 	local root = Instance.new("Model")
 	root.Name = "FarProxy"
 	self.root, self.entries, self.groups = root, {}, {}
-	self.attachments, self.beams, self.realBeams, self.bones = {}, {}, {}, {}
+	self.attachments, self.beams, self.realBeams, self.bones, self.lights = {}, {}, {}, {}, {}
 	self.groundEntries = {}
 
 	for _, src in sources do
@@ -79,6 +81,10 @@ function FarProxy.new(sources)
 				end
 			elseif d:IsA("Beam") then
 				table.insert(self.beams, { beam = d, w0 = d.Width0, w1 = d.Width1, c0 = d.CurveSize0, c1 = d.CurveSize1 })
+			elseif d:IsA("Light") then
+				d.Shadows = false -- a shadow map can't resolve the copy's few-stud geometry
+				d:SetAttribute("ProxyGain", PROXY_LIGHT_GAIN) -- Look.setFloods applies it (matched on the wide shot)
+				table.insert(self.lights, { light = d, range = d.Range }) -- the floods light the copy at its own scale
 			end
 		end
 		self.groups[src.name] = group
@@ -190,6 +196,9 @@ function FarProxy:setScale(s)
 	for _, b in self.beams do
 		b.beam.Width0, b.beam.Width1 = b.w0 * s, b.w1 * s
 		b.beam.CurveSize0, b.beam.CurveSize1 = b.c0 * s, b.c1 * s
+	end
+	for _, l in self.lights do
+		l.light.Range = math.max(l.range * s, MIN_LIGHT_RANGE)
 	end
 end
 

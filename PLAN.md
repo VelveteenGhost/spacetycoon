@@ -211,12 +211,22 @@ tree belts and the press flag, with its bones mirrored, about 2,100 parts.
 
 ### 5. Lighting
 
-Use the guide's table as the starting point: Future lighting, Atmosphere, clouds, bloom, colour grade, sun rays,
-and the exposure dip at ignition. Then tune against the reference frames. Sunrise comes first as the hero look;
-night with the floods comes last.
+**Status Nov 9: in place, waiting on Eli's look sign-off.** `Look` drives everything from one sun preset and one
+weather preset; DECISIONS.md has the reasons.
 
-Roblox lights reach only 60 studs, so the floods are props: emissive lenses plus a glow sprite. The real light
-comes from SpotLights within 15 m of the vehicle and a warm SurfaceLight under each pole.
+- Lighting style is Realistic (Eli set it). The sun is placed from ClockTime at latitude 15.5; at blue hour it
+  waits at the morning angle with no brightness (see DECISIONS).
+- Six baked skies (`art/sky/`, `tools/reference/bake_sky.py`, then `tools/sky_faces.py`), checked against the
+  reference frames on the mount shot: sunrise within about 10 levels, morning and blue hour close after one gain
+  pass each. Marine skies use the same gains, unchecked.
+- Floods: 12 cones and 4 apron pools in `Port.Lights` (SceneBuilder), tuned at quality level 15. The lenses glow at
+  night; the copy for the far cameras carries its own lights.
+- Glows: 17 aviation beacons (steady and flashing) and 16 flood lamps with haze halos, in `Glows`.
+- Reference frames for the other looks: `tools/reference/capture_looks.py`.
+
+Open: the left mount pillar stays darker than the reference at blue hour (the light comes from closer); the
+morning and marine looks need Eli's eye; the light response at a phone's quality level is unmeasured until his
+test. Tune with two captures per change: Studio renders lazily when it isn't focused.
 
 ### 6. Effects
 

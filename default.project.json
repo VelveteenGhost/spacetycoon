@@ -4,17 +4,29 @@
     "$className": "DataModel",
     "ReplicatedStorage": {
       "$className": "ReplicatedStorage",
-      "$path": "src/ReplicatedStorage"
+      "$ignoreUnknownInstances": true,
+      "Port": {
+        "$path": "src/ReplicatedStorage/Port",
+        "$ignoreUnknownInstances": true
+      }
     },
     "ServerStorage": {
       "$className": "ServerStorage",
-      "$path": "src/ServerStorage"
+      "$ignoreUnknownInstances": true,
+      "PortTools": {
+        "$path": "src/ServerStorage/PortTools",
+        "$ignoreUnknownInstances": true
+      }
     },
     "StarterPlayer": {
       "$className": "StarterPlayer",
+      "$ignoreUnknownInstances": true,
       "StarterPlayerScripts": {
         "$className": "StarterPlayerScripts",
-        "$path": "src/StarterPlayer/StarterPlayerScripts"
+        "$ignoreUnknownInstances": true,
+        "Director": {
+          "$path": "src/StarterPlayer/StarterPlayerScripts/Director.client.luau"
+        }
       }
     }
   }

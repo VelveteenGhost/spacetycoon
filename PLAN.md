@@ -44,8 +44,9 @@ real risk is how the near shots look on a phone at default quality, not draw dis
 
 ### 0. Setup
 
-- Repo: `src/` mirrors the game tree and is the source of truth for code. I push it into Studio over MCP and keep
-  a `default.project.json` for Rojo tooling. `tools/manifest_to_luau.py` turns `export/manifest.json` into
+- Repo: `src/` mirrors the game tree and is the source of truth for code. I push it into Studio over MCP, and
+  `rojo serve` syncs it too: `default.project.json` maps only the code folders and never deletes, so the scene,
+  built in Studio, stays Studio's. `tools/manifest_to_luau.py` turns `export/manifest.json` into
   `src/ReplicatedStorage/Port/Manifest.luau`, so pivots, attachments and placement rules come from one place.
 - Place: StreamingEnabled off, so cameras 10 km out still see the whole site. CharacterAutoLoads off, since the
   shot is camera-only. Remove the Baseplate and SpawnLocation.
@@ -270,8 +271,11 @@ was needed. DECISIONS.md has the reasons.
   and fill light from OutdoorAmbient.
 
 Open: the MVac and bell heat glow (SurfaceAppearance emissive needs a mask the export doesn't have); a curved limb
-(the ground is flat to six times the camera's height); floating origin, if the onboard shots jitter at 50 km
-(untested at full frame rate).
+(the ground is flat to six times the camera's height).
+
+Fixed after Eli's first playtest: the jitter after separation was float32 precision, 250,000–480,000 studs out. A
+floating origin above 6 km (`Flight.origin`, DECISIONS) cut the onboard camera's wobble against the hull from
+0.013–0.027 studs a frame on average (0.044 at worst) to 0.0003–0.0007 (0.002 after separation).
 
 ### 8. Done checks
 
@@ -313,8 +317,8 @@ mid-range laptop, and Eli looking at the flame and glows on a real phone.
   parts, since it's re-placed every frame. Glowing tiles in their hazed colour (as above 30 km) fixed the tracker
   in a test, but not the dark strip at the wide shot's horizon, which needs its own look.
 - The far cameras' sky and ground colour, and the clear sky's cloud billboards.
-- From phases 5 to 7: the blue-hour mount pillar, the morning and marine looks, the MVac heat glow, a curved limb,
-  and floating origin if the onboard shots jitter at full frame rate.
+- From phases 5 to 7: the blue-hour mount pillar, the morning and marine looks, the MVac heat glow and a curved
+  limb.
 
 ## Risks to retire early
 

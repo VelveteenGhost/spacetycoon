@@ -2,6 +2,20 @@
 
 Newest first. One line of reason each.
 
+## 2026-11-09 (after the first playtest)
+
+- **Floating origin above 6 km (`Flight.origin`).** Roblox keeps positions in float32. With the camera 250,000–480,000
+  studs out, the onboard camera wobbled 0.013–0.044 studs a frame against the hull beside it (measured). That was
+  the jitter after separation. Above 6 km the camera stands about 4.5 km over a render origin that follows it in 1 km
+  steps, and Flight builds its frames from plain numbers relative to it, so nothing is rounded at full distance.
+  The site and terrain don't move; from up there they're 4.5 km down, under the copy's ground.
+- **The contrail keeps the mood study's 680 puffs at up to 32 a second.** At 260 a full pool recycled its oldest
+  puffs, which left only the last 15 s of trail. If the phone test shows the cost, fall back to the mood study's own
+  phone setting: 280 puffs at 18 a second, which keeps about 28 s.
+- **The Rojo project maps only the code folders and never deletes.** Mapped whole, Rojo would have removed everything
+  in those services that isn't in `src/`, such as the imported templates. Code edited in the repo syncs into Studio
+  with `rojo serve`, and the scene stays Studio's.
+
 ## 2026-11-09
 
 - **Bake the mood study's sky into a Roblox skybox per look (sunrise, morning, blue hour × clear, marine), and

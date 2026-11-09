@@ -123,10 +123,11 @@ function Glows.new(parent)
 	return self
 end
 
--- camPos in studs; scale: the far-camera copy's scale while it shows, else nil. flood: 0..1, elev: sun elevation in
--- degrees, fog: the shot's haze density per metre (Look.fogDensity).
-function Glows:update(time, camPos, scale, flood, elev, fog)
-	local camM = camPos / S
+-- camPos and origin (Flight.origin) in studs, camPos from the origin while the glows' own positions are true ones;
+-- scale: the far-camera copy's scale while it shows, else nil. flood: 0..1, elev: sun elevation in degrees, fog: the
+-- shot's haze density per metre (Look.fogDensity).
+function Glows:update(time, camPos, scale, flood, elev, fog, origin)
+	local camM = (camPos + origin) / S
 	local night = 1 - smooth(-3, 12, elev)
 	local hz = math.clamp((fog - 0.0003) / 0.001, 0, 1)
 	local s = scale or 1
@@ -159,7 +160,7 @@ function Glows:update(time, camPos, scale, flood, elev, fog)
 		g.gui.Enabled = on
 		if on then
 			-- a touch toward the camera, so the bulb or lamp housing doesn't cut the glow in half
-			local p = g.pos * S
+			local p = g.pos * S - origin
 			p += (camPos - p).Unit * math.min(0.6 * S, (camPos - p).Magnitude * 0.5)
 			g.att.WorldPosition = scale and camPos + (p - camPos) * s or p
 			g.gui.Size = UDim2.new(w * S * s, 0, h * S * s, 0)

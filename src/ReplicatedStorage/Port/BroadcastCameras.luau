@@ -52,6 +52,17 @@ function Cams.new()
 	return { mode = "drone", orbitA = 3.95, aim = Vector3.new(0, 46, 0), aimSnap = true, onbView = nil }
 end
 
+-- When Flight.origin moves by -d, everything the rig remembers moves by d, so the shot carries on unbroken.
+function Cams.shift(rig, d)
+	rig.aim += d
+	if rig.pos then
+		rig.pos += d
+	end
+	if rig.lensPos then
+		rig.lensPos += d
+	end
+end
+
 function Cams.set(rig, mode)
 	rig.mode, rig.aimSnap, rig.onbView = mode, true, nil
 	rig.label = Cams.CAMS[mode].label
@@ -84,8 +95,9 @@ end
 -- degrees unzoomed, widening the lens to keep the framing at the vehicle's depth.
 Cams.MIN_SPAN = 2
 
--- Returns the camera frame in metres, the vertical field of view and the on-screen label.
+-- Returns the camera frame in metres from Flight.origin, the vertical field of view and the on-screen label.
 function Cams.update(rig, st, t, dt, heard, aspect, motion)
+	local O = Flight.origin -- the camera positions below are on the ground, so they move against it
 	local w = motion and 1 or 0
 	local cc = Cams.CAMS[rig.mode]
 	local k, maxEl, fov, lead = 2, rad(80), cc.fov, 1
@@ -104,27 +116,27 @@ function Cams.update(rig, st, t, dt, heard, aspect, motion)
 			math.cos(rig.orbitA) * r + math.sin(t * 0.37) * 1.3 * w,
 			74 + climb + math.sin(t * 0.53) * 1.1 * w,
 			math.sin(rig.orbitA) * r + math.cos(t * 0.29) * 1.3 * w
-		)
+		) - O
 		desired = focus(46)
 			+ Vector3.new(math.sin(t * 0.41) * 0.35 * w, math.sin(t * 0.33) * 0.45 * w, math.cos(t * 0.47) * 0.35 * w)
 		k = 2.4
 		fov = math.clamp(2 * deg(math.atan(115 / (pos - desired).Magnitude)), 4.5, 16)
 	elseif mode == "long" then
-		pos = Vector3.new(500 + math.sin(t * 0.11) * 2 * w, 9, -1300 + math.sin(t * 0.07) * 3 * w) -- press riser on the beach
+		pos = Vector3.new(500 + math.sin(t * 0.11) * 2 * w, 9, -1300 + math.sin(t * 0.07) * 3 * w) - O -- press riser on the beach
 		desired = focus(38) + Vector3.new(0, math.sin(t * 0.9) * 0.06 * w, 0)
 		k = 2.2
 		fov = math.clamp(2 * deg(math.atan(150 / (pos - desired).Magnitude)), 1.1, 4.4)
 		desired = trailRoom(st, pos, desired, fov)
 	elseif mode == "coast" then
-		pos = Vector3.new(530, 7, 3000) -- tripod on the north beach
+		pos = Vector3.new(530, 7, 3000) - O -- tripod on the north beach
 		desired = focus(34)
 		k = 1.1
 		fov = math.clamp(2 * deg(math.atan(200 / (pos - desired).Magnitude)), 2.4, 9)
 		desired = trailRoom(st, pos, desired, fov)
 	elseif mode == "wide" then
 		-- locked off 4 km inland; eases out to hold the whole arc, pad to vehicle, in frame
-		pos = Vector3.new(-2600, 14, -2900)
-		local padV, vehV = Vector3.new(0, 20, 0) - pos, focus(30) - pos
+		pos = Vector3.new(-2600, 14, -2900) - O
+		local padV, vehV = Vector3.new(0, 20, 0) - O - pos, focus(30) - pos
 		local function az(v)
 			return math.atan2(v.X, v.Z)
 		end
@@ -143,27 +155,28 @@ function Cams.update(rig, st, t, dt, heard, aspect, motion)
 		k, lead = 1.2, 0
 	elseif mode == "press" then
 		-- low on the grass, the range flag in the foreground; tilts up once the vehicle climbs out of the frame
-		pos = PRESS
+		local press = PRESS - O
+		pos = press
 		local padAz = math.atan2(-PRESS.X, -PRESS.Z)
-		local v = focus(40) - PRESS
+		local v = focus(40) - press
 		local vEl = math.atan2(v.Y, hypot(v.X, v.Z))
 		local follow = smooth(rad(20), rad(30), vEl)
 		local el = math.clamp(vEl - rad(3), rad(5), lerp(rad(22), rad(70), follow))
 		local az = lerp(padAz + rad(4.5), math.atan2(v.X, v.Z), lerp(0.35, 1, follow))
-		desired = PRESS + Vector3.new(math.sin(az) * math.cos(el), math.sin(el), math.cos(az) * math.cos(el)) * 1000
+		desired = press + Vector3.new(math.sin(az) * math.cos(el), math.sin(el), math.cos(az) * math.cos(el)) * 1000
 		k, lead = 0.9, 0
 	elseif mode == "tracker" then
-		pos = Vector3.new(-3000, 30, -11000) -- tracking mount 11 km inland
+		pos = Vector3.new(-3000, 30, -11000) - O -- tracking mount 11 km inland
 		desired = focus(st.alt > 30 and 20 or 38)
 		k = 2
 		fov = math.clamp(2 * deg(math.atan(240 / (pos - desired).Magnitude)), 0.16, 4.4)
 		desired = trailRoom(st, pos, desired, fov)
 	elseif mode == "pad" then
-		pos = Vector3.new(-46 + math.sin(t * 0.045) * 7 * w, 2.4, 54 + math.cos(t * 0.045) * 3 * w)
+		pos = Vector3.new(-46 + math.sin(t * 0.045) * 7 * w, 2.4, 54 + math.cos(t * 0.045) * 3 * w) - O
 		desired = focus(47)
 		k, maxEl = 1.6, rad(74)
 	elseif mode == "mount" then
-		pos = Vector3.new(34 + math.sin(t * 0.05) * 0.3 * w, 1.8, 10 + math.cos(t * 0.04) * 0.3 * w)
+		pos = Vector3.new(34 + math.sin(t * 0.05) * 0.3 * w, 1.8, 10 + math.cos(t * 0.04) * 0.3 * w) - O
 		desired = focus(16)
 		k, maxEl = 1.4, rad(62)
 	else -- onboard: Cam 12 on the booster, then Cam 14 under stage 2 after separation

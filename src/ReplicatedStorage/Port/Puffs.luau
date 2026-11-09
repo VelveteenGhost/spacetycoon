@@ -26,8 +26,9 @@ local NOZZLE_Y = 8
 -- contrail level of detail: as the trail ages every other puff fades out at each threshold and the survivors grow
 -- to cover the gap, so the count stays flat while the trail lasts minutes
 local TRAIL_TIERS, TRAIL_GROW = { 6, 16, 36, 70 }, 1.42
--- The mood study keeps 720 ground and 680 trail puffs; a phone gets fewer and bigger ones.
-local CAPS = { ground = 140, trail = 260, gas = 60 }
+-- The mood study keeps 720 ground and 680 trail puffs. The ground cloud gets fewer and bigger ones; the contrail keeps
+-- all 680, since a full pool recycles its oldest puffs and 260 held only the last 15 s of trail (Nov 9).
+local CAPS = { ground = 140, trail = 680, gas = 60 }
 local GROUND_K = 0.16 -- of the mood study's spawn rates, to fit the cap
 local GROUND_GROW = 1.5 -- and bigger puffs to keep the mass
 
@@ -180,7 +181,7 @@ end
 function Puffs:update(st, dt, t, look, view)
 	local r = self.rng
 	local thrust, alt = st.thrust, st.alt
-	local stack = Flight.stack(st)
+	local stack = Flight.stack(st) + Flight.origin -- puffs live in true space; Flight's frames are from its origin
 	local nozzle = stack:PointToWorldSpace(Vector3.new(0, NOZZLE_Y, 0))
 	local down = -stack.UpVector
 	local acc = self.acc
@@ -226,7 +227,7 @@ function Puffs:update(st, dt, t, look, view)
 			local lenS = (0.35 + 0.65 * thrust) * (0.65 + 1.5 * smooth(60, 3000, alt)) * (1 + alt / 30000)
 			local flameLen = 48 * lenS
 			local s0 = 14 + alt * 0.004
-			acc.trail += math.clamp(st.vel / (s0 * 0.3) + 8, 8, 24) * dt
+			acc.trail += math.clamp(st.vel / (s0 * 0.3) + 8, 8, 32) * dt
 			local side = stack.RightVector
 			local zAxis = stack.LookVector
 			local n = math.floor(acc.trail)

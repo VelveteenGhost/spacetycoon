@@ -137,11 +137,40 @@ local cutAlpha = 0
 local hud
 
 local function refreshDeck()
-	hud:setDeck(st.mode, autoCam, sunPreset, wxPreset)
+	hud:setDeck(st.mode, autoCam, sunPreset, wxPreset, rig.mode)
+end
+
+-- Floating origin (Flight.origin): above 6 km the camera stands about 4.5 km over a render origin that follows it in
+-- 1 km steps, so the vehicle and everything placed around it keep full precision 100 km out. The site and terrain
+-- stay where they are; from up there they're 4.5 km down, under the copy's ground.
+local ORIGIN_ON, ORIGIN_OFF = 6000, 5500 -- m, true camera height
+local ORIGIN_LIFT, ORIGIN_DRIFT, ORIGIN_GRID = 4500, 2500, 1024 -- m
+
+local function setOrigin(o)
+	if o ~= Flight.origin then
+		Cams.shift(rig, Flight.origin - o)
+		Flight.origin = o
+	end
+end
+
+local function placeOrigin()
+	local o = Flight.origin
+	local cam = rig.pos -- last frame's, from the origin
+	if not cam then
+		return
+	end
+	local high = (cam + o).Y > (o == Vector3.zero and ORIGIN_ON or ORIGIN_OFF)
+	if not high then
+		setOrigin(Vector3.zero)
+	elseif o == Vector3.zero or (cam - Vector3.new(0, ORIGIN_LIFT, 0)).Magnitude > ORIGIN_DRIFT then
+		local want, g = cam + o - Vector3.new(0, ORIGIN_LIFT, 0), ORIGIN_GRID
+		setOrigin(Vector3.new(math.round(want.X / g) * g, math.round(want.Y / g) * g, math.round(want.Z / g) * g))
+	end
 end
 
 local function startSeq(mode)
 	st = Flight.new(mode)
+	setOrigin(Vector3.zero)
 	effects:reset()
 	puffs:reset()
 	hist = {}
@@ -201,10 +230,10 @@ end
 hud = Hud.new(Players.LocalPlayer:WaitForChild("PlayerGui"), {
 	onSequence = startSeq,
 	onCamera = function(which)
-		if which == "auto" then
-			setCamera("auto")
-		else
+		if which == "next" then
 			nextCamera()
+		else
+			setCamera(which)
 		end
 	end,
 	onToggleOverlay = toggleOverlay,
@@ -284,7 +313,13 @@ RunService:BindToRenderStep("PortDirector", Enum.RenderPriority.Camera.Value + 1
 		local want = Cams.directorPick(st, holdT)
 		if want ~= rig.mode then
 			Cams.set(rig, want)
+			refreshDeck()
 		end
+	end
+	placeOrigin()
+	local origin = Flight.origin * S -- studs
+	local trueAlt = function(v) -- metres above the ground, for a point given from the origin
+		return v.Y + Flight.origin.Y
 	end
 
 	-- vehicle, fuel arm and clamps
@@ -311,8 +346,8 @@ RunService:BindToRenderStep("PortDirector", Enum.RenderPriority.Camera.Value + 1
 	camera.FieldOfView = fov
 	camera.CFrame = toStuds(cf)
 	if port:GetAttribute("Proxy") ~= false then
-		proxy:setGroundGlow((rig.lensPos or rig.pos).Y > Look.SPACE_ALT)
-		proxy:update(camera.CFrame.Position, Vector3.zero, rig.mode, stack.Position)
+		proxy:setGroundGlow(trueAlt(rig.lensPos or rig.pos) > Look.SPACE_ALT)
+		proxy:update(camera.CFrame.Position, -origin, rig.mode, stack.Position, origin)
 	elseif proxy.active then
 		proxy:deactivate()
 	end
@@ -333,13 +368,13 @@ RunService:BindToRenderStep("PortDirector", Enum.RenderPriority.Camera.Value + 1
 	-- with altitude; the exposure dip follows the engines every frame
 	local cc = Cams.CAMS[rig.mode]
 	local key = sunPreset .. wxPreset .. rig.mode .. tostring(proxy.active)
-		.. tostring((rig.lensPos or rig.pos).Y > Look.SPACE_ALT)
+		.. tostring(trueAlt(rig.lensPos or rig.pos) > Look.SPACE_ALT)
 	lookT += rawDt
 	if key ~= lookKey or lookT > 0.25 then
 		lookKey, lookT = key, 0
 		local flood = Look.apply({
 			sun = sunPreset,
-			camAlt = (rig.lensPos or rig.pos).Y,
+			camAlt = trueAlt(rig.lensPos or rig.pos),
 			elev = Look.PRESETS[sunPreset],
 			wx = wxPreset,
 			camFog = cc.fog,
@@ -359,9 +394,9 @@ RunService:BindToRenderStep("PortDirector", Enum.RenderPriority.Camera.Value + 1
 	else
 		Look.setExposure(Look.PRESETS[sunPreset], wxPreset, heard * cc.prox)
 	end
-	glows:update(t, camera.CFrame.Position, proxy.active and proxy.scale or nil, Look.flood, Look.elev, Look.fogDensity)
+	glows:update(t, camera.CFrame.Position, proxy.active and proxy.scale or nil, Look.flood, Look.elev, Look.fogDensity, origin)
 
-	-- exhaust puffs: real within the copy's hole around the camera, in the copy beyond it
+	-- exhaust puffs, simulated in true space: real within the copy's hole around the camera, in the copy beyond it
 	local camPos = camera.CFrame.Position
 	local sc = proxy.active and proxy.scale or nil
 	local sunCam = camera.CFrame:VectorToObjectSpace(Look.sunDir)
@@ -374,8 +409,9 @@ RunService:BindToRenderStep("PortDirector", Enum.RenderPriority.Camera.Value + 1
 		flood = Look.flood,
 		sunDir = Look.sunDir,
 	}, {
-		camM = camPos / S,
+		camM = (camPos + origin) / S,
 		place = function(p)
+			p -= origin
 			if sc and (p - camPos).Magnitude > FarProxy.HOLE then
 				return camPos + (p - camPos) * sc, sc
 			end
@@ -393,7 +429,7 @@ RunService:BindToRenderStep("PortDirector", Enum.RenderPriority.Camera.Value + 1
 	hudT += rawDt
 	if hudT > 0.2 then
 		hudT = 0
-		local pos, aim = rig.lensPos or rig.pos, rig.aim
+		local pos, aim = (rig.lensPos or rig.pos) + Flight.origin, rig.aim + Flight.origin
 		local hdg = math.round((math.deg(math.atan2(aim.X - pos.X, -(aim.Z - pos.Z))) + 360) % 360) % 360
 		local rng = math.sqrt((pos.X - st.posX) ^ 2 + pos.Z ^ 2) / 1852
 		local altFt = math.round(pos.Y * 3.281 / 10) * 10

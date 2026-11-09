@@ -90,7 +90,9 @@ function FarProxy.new(sources)
 		for _, d in copy:GetDescendants() do
 			if d:IsA("BasePart") then
 				quiet(d)
-				table.insert(self.entries, { proxy = d, real = byIndex[d:GetAttribute("ProxyIndex")], size = d.Size })
+				-- the vehicle's real parts are placed from the render origin (Flight.origin), the rest are where they stand
+				table.insert(self.entries, { proxy = d, real = byIndex[d:GetAttribute("ProxyIndex")], size = d.Size,
+					placed = src.name == "VEH" })
 				table.insert(group.proxies, d)
 			elseif d:IsA("Attachment") then
 				table.insert(self.attachments, { att = d, pos = d.Position }) -- bones too: their offsets scale with the mesh
@@ -261,8 +263,9 @@ function FarProxy:deactivate()
 	self.active, self.exclude, self.holeCentre = false, nil, nil
 end
 
--- Call every frame after the real parts are placed. camPos and pad are in studs.
-function FarProxy:update(camPos, pad, mode, vehiclePos)
+-- Call every frame after the real parts are placed. Studs: camPos, pad and vehiclePos from the render origin, and
+-- origin itself (Flight.origin); the copy keeps the ground and the hole in true positions.
+function FarProxy:update(camPos, pad, mode, vehiclePos, origin)
 	if (camPos - pad).Magnitude <= FarProxy.NEAR then
 		if self.active then
 			self:deactivate()
@@ -282,19 +285,23 @@ function FarProxy:update(camPos, pad, mode, vehiclePos)
 		self:setScale(ideal)
 		rescaled = true
 	end
-	local flat = Vector3.new(camPos.X, 0, camPos.Z)
-	local reachDrift = self.groundReach and math.abs(groundReach(camPos) / self.groundReach - 1) > 0.25
+	local trueCam = camPos + origin
+	local flat = Vector3.new(trueCam.X, 0, trueCam.Z)
+	local reachDrift = self.groundReach and math.abs(groundReach(trueCam) / self.groundReach - 1) > 0.25
 	if rescaled or reachDrift or not self.holeCentre
 		or (flat - self.holeCentre * Vector3.new(1, 0, 1)).Magnitude
-			> (camPos.Y < HIGH and FarProxy.HOLE / 3 or self.groundReach * 0.1)
+			> (trueCam.Y < HIGH and FarProxy.HOLE / 3 or self.groundReach * 0.1)
 	then
-		self:buildGround(camPos)
+		self:buildGround(trueCam)
 	end
+	-- each copy sits at camPos + s * (P - camPos), P from the render origin: true positions lose origin * s
 	local s = self.scale
 	local offset = camPos * (1 - s)
+	local shift = origin * s
 	for i, e in self.all do
 		local cf = e.real and e.real.CFrame or e.base
-		self.cfs[i] = CFrame.new(cf.Position * s + offset) * cf.Rotation
+		local p = cf.Position * s + offset
+		self.cfs[i] = CFrame.new(e.placed and p or p - shift) * cf.Rotation
 	end
 	Workspace:BulkMoveTo(self.proxyParts, self.cfs, Enum.BulkMoveMode.FireCFrameChanged)
 	for _, b in self.bones do

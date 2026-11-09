@@ -42,6 +42,16 @@ Flight.EVENTS = {
 
 local B_CG = Vector3.new(0, 25, 0) -- booster centre of mass, stack-local
 
+-- Render origin, metres (the Director moves it). Roblox keeps positions in float32, which past 100 km out resolve
+-- only a centimetre or so, enough to shake an onboard camera against the hull beside it. So the state keeps plain
+-- numbers, and stack, upper and focus return frames relative to this origin, built before anything is rounded.
+Flight.origin = Vector3.zero
+
+local function at(x, y)
+	local o = Flight.origin
+	return CFrame.new(x - o.X, y - o.Y, -o.Z)
+end
+
 local function smooth(a, b, x)
 	local t = math.clamp((x - a) / (b - a), 0, 1)
 	return t * t * (3 - 2 * t)
@@ -86,9 +96,11 @@ function Flight.new(mode)
 		mecoDone = false,
 		separated = false,
 		sepBurst = false,
-		bPos = Vector3.zero,
+		bx = 0, -- booster and upper-stage positions once they fly apart (x, y; numbers, see Flight.origin)
+		by = 0,
+		ux = 0,
+		uy = 0,
 		bVel = Vector3.zero,
-		uPos = Vector3.zero,
 		uVel = Vector3.zero,
 		bPitch = 0,
 		uPitch = 0,
@@ -121,13 +133,15 @@ function Flight.step(st, dt)
 		if not st.mecoDone then -- two free bodies from here: the booster about its centre of mass, and the upper stage
 			st.mecoDone = true
 			st.bPitch, st.uPitch = st.pitch, st.pitch
-			st.bPos = Vector3.new(st.posX, st.alt, 0) + rotZ(B_CG, -st.pitch)
+			local cg = rotZ(B_CG, -st.pitch)
+			st.bx, st.by = st.posX + cg.X, st.alt + cg.Y
 			st.bVel = st.rv
-			st.uPos = Vector3.new(st.posX, st.alt, 0)
+			st.ux, st.uy = st.posX, st.alt
 			st.uVel = st.rv
 		end
 		st.bVel -= Vector3.new(0, 9.81 * dt, 0)
-		st.bPos += st.bVel * dt
+		st.bx += st.bVel.X * dt
+		st.by += st.bVel.Y * dt
 		local ax = Vector3.new(math.sin(st.uPitch), math.cos(st.uPitch), 0)
 		if tr >= Flight.T_SEP then
 			if not st.separated then
@@ -140,26 +154,29 @@ function Flight.step(st, dt)
 			st.s2Thrust = smooth(Flight.T_SES, Flight.T_SES + 1.5, tr)
 			st.uVel += ax * 9.5 * st.s2Thrust * dt
 			st.uVel -= Vector3.new(0, 2.5 * dt, 0)
-			st.uPos += st.uVel * dt
+			st.ux += st.uVel.X * dt
+			st.uy += st.uVel.Y * dt
 		else
 			st.uVel = st.bVel
-			st.uPos = st.bPos - rotZ(B_CG, -st.bPitch)
+			local cg = rotZ(B_CG, -st.bPitch)
+			st.ux, st.uy = st.bx - cg.X, st.by - cg.Y
 		end
-		st.alt, st.posX, st.vel, st.rv = st.uPos.Y, st.uPos.X, st.uVel.Magnitude, st.uVel
+		st.alt, st.posX, st.vel, st.rv = st.uy, st.ux, st.uVel.Magnitude, st.uVel
 	end
 end
 
--- Stack (booster) and upper-stage frames, metres. Parts are modelled in stack-local coordinates.
+-- Stack (booster) and upper-stage frames, metres from Flight.origin. Parts are modelled in stack-local coordinates.
 function Flight.stack(st)
 	if st.mecoDone then
-		return CFrame.new(st.bPos - rotZ(B_CG, -st.bPitch)) * CFrame.Angles(0, 0, -st.bPitch)
+		local cg = rotZ(B_CG, -st.bPitch)
+		return at(st.bx - cg.X, st.by - cg.Y) * CFrame.Angles(0, 0, -st.bPitch)
 	end
-	return CFrame.new(st.posX, st.alt, 0) * CFrame.Angles(0, 0, -st.pitch)
+	return at(st.posX, st.alt) * CFrame.Angles(0, 0, -st.pitch)
 end
 
 function Flight.upper(st)
 	if st.separated then
-		return CFrame.new(st.uPos) * CFrame.Angles(0, 0, -st.uPitch)
+		return at(st.ux, st.uy) * CFrame.Angles(0, 0, -st.uPitch)
 	end
 	return Flight.stack(st)
 end

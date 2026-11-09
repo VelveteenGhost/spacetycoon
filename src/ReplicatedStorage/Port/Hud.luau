@@ -209,9 +209,14 @@ function Hud.new(playerGui, callbacks)
 	button("clear", "CLEAR", 7, function() callbacks.onSky("clear") end)
 	button("broken", "BROKEN", 8, function() callbacks.onSky("broken") end)
 	button("marine", "MARINE", 9, function() callbacks.onSky("marine") end)
-	button("auto", "AUTO CAM", 10, function() callbacks.onCamera("auto") end)
-	button("next", "NEXT CAM", 11, function() callbacks.onCamera("next") end)
-	button("hide", "HIDE", 12, function() callbacks.onToggleOverlay() end)
+	-- one per camera, near to far; the live one stays lit, auto cuts included
+	for i, cam in { { "mount", "MOUNT" }, { "pad", "PAD" }, { "onboard", "ONBOARD" }, { "drone", "AERIAL" },
+		{ "press", "PRESS" }, { "long", "LONG LENS" }, { "coast", "COAST" }, { "wide", "WIDE" }, { "tracker", "TRACKER" } } do
+		button("cam_" .. cam[1], cam[2], 9 + i, function() callbacks.onCamera(cam[1]) end)
+	end
+	button("auto", "AUTO CAM", 19, function() callbacks.onCamera("auto") end)
+	button("next", "NEXT CAM", 20, function() callbacks.onCamera("next") end)
+	button("hide", "HIDE", 21, function() callbacks.onToggleOverlay() end)
 	return self
 end
 
@@ -222,9 +227,9 @@ function Hud:layout(viewport)
 	self.deckScale.Scale = math.max(s, 0.75) -- keep buttons tappable on phones
 end
 
-function Hud:setDeck(seqMode, auto, sun, sky)
+function Hud:setDeck(seqMode, auto, sun, sky, cam)
 	for key, b in self.buttons do
-		local on = key == seqMode or (key == "auto" and auto) or key == sun or key == sky
+		local on = key == seqMode or (key == "auto" and auto) or key == sun or key == sky or key == "cam_" .. cam
 		b.BackgroundTransparency = on and 0.84 or 1
 		b.TextColor3 = on and INK or DIM
 		b:FindFirstChildOfClass("UIStroke").Color = on and TALLY or INK

@@ -191,14 +191,18 @@ function Cams.update(rig, st, t, dt, heard, aspect, motion)
 
 	-- operators lead the vehicle instead of chasing it; the lead pays off the aim's smoothing lag
 	local leadV = mode ~= "onboard" and st.rv * (lead / k) or Vector3.zero
-	desired += leadV
-	local d = desired - pos
-	local hz = hypot(d.X, d.Z)
-	if math.atan2(d.Y, hz) > maxEl then
-		desired = pos + Vector3.new(d.X, math.tan(maxEl) * hz, d.Z)
+	local function tilt(p) -- no steeper than the head can tilt
+		local d = p - pos
+		local hz = hypot(d.X, d.Z)
+		if math.atan2(d.Y, hz) > maxEl then
+			return pos + Vector3.new(d.X, math.tan(maxEl) * hz, d.Z)
+		end
+		return p
 	end
+	local subject = tilt(desired)
+	desired = tilt(desired + leadV)
 	if rig.aimSnap then
-		rig.aim, rig.aimSnap = desired - leadV, false -- a cut has no lag to pay off: start on the subject
+		rig.aim, rig.aimSnap = subject, false -- a cut has no lag to pay off: start on the subject
 	else
 		rig.aim = rig.aim:Lerp(desired, 1 - math.exp(-k * dt))
 	end

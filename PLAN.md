@@ -204,10 +204,10 @@ tree belts and the press flag, with its bones mirrored, about 2,100 parts.
 - **Still open:**
   - The dune ridge flattens beyond about 60 m from the coast and long-lens cameras, since the real dune is only
     drawn inside the hole. It needs a copied ridge.
-  - The coast, long-lens, tracker and high-altitude onboard shots have no visual check yet.
-  - For the lighting phase: a faint colour step where the real grass meets the copied ground, a sea band that's
-    too dark at the horizon, and per-camera haze.
-  - For phase 6: scaled emitters on the copy.
+  - A faint colour step where the real grass meets the copied ground, and a sea band that's too dark at the
+    horizon. Per-camera haze is done (`Look`, phase 5).
+  - Done Nov 9: the coast, long-lens, tracker and high-altitude onboard shots (phase 7), and effects for the copy,
+    which `Puffs` draws into either space instead of scaled emitters.
 
 ### 5. Lighting
 
@@ -236,7 +236,9 @@ test. Tune with two captures per change: Studio renders lazily when it isn't foc
   and bloom make it white-hot. Plume core and glow Beams fade when seen end-on, as in the mood study; nine jet
   Beams; shock diamonds at sea level; a warm halo; the green flash at ignition.
 - Fire tongues down from the exits and out along the trench; a flame light under the mount, then riding the plume.
-- Ground cloud from the trench, a ring at the mount, columns and both sides: lit billow textures, drag and wind.
+- Ground cloud from the trench, a ring at the mount, columns and both sides: since Nov 9 every camera sees it through
+  `Puffs`, the mood study's own simulation on the sequence clock (see DECISIONS). The particle version was smaller
+  than the mood study's, ran on Roblox's particle clock, and couldn't be seeked.
 - Vents at the vehicle, the mount and the fuel arm (stopping as the arm swings clear); ice shed from both frost
   bands at ignition, a Grid2x2 flipbook that flutters.
 - Surf: the mood study's two foam layers off the beach, ±6 km along the shore, scrolled toward it (`Surf`, built by
@@ -247,11 +249,10 @@ Checked as stills on the mount and pad cameras (static fire T+3, launch T+4). Un
 about a ninth of real time, so fast ones (the flame) clump in captures and the cloud takes minutes to mature; the
 motion needs a look at full frame rate, in focused Studio or on the phone.
 
-Open, after the phone test:
-- **Far cameras (drone and beyond) see the ground cloud, contrail and flame through `Puffs`** (phase 7), not the
-  particles: the copy's ground hides real particles below eye level, and real distance fogs them out. The vents and
-  ice stay near-camera only, where they're visible anyway.
-- MicroProfiler at liftoff with the cloud at its fullest.
+The far cameras (drone and beyond) see the flame through `Puffs` too: the copy's ground hides real particles below
+eye level, and real distance fogs them out. The vents and ice stay near-camera only, where they're visible anyway.
+
+Open, after the phone test: MicroProfiler at liftoff with the cloud at its fullest, at full frame rate.
 
 ### 7. Altitude set
 
@@ -276,6 +277,44 @@ Open: the MVac and bell heat glow (SurfaceAppearance emissive needs a mask the e
 
 These are the guide's list: scale, motion, separation, all ten cameras side by side, MicroProfiler on a
 mid-range laptop, and Eli looking at the flame and glows on a real phone.
+
+**Status Nov 9: everything Studio can check is done; motion, frame rate and the look need full frame rate and Eli.**
+
+- **Scale:** passed in phase 3 (the guide's checks) and unchanged since.
+- **Side by side:** all nine camera positions at launch T+20, sunrise, clear, against the mood study's frames, in
+  `previews/port/launch_T+20_sheet.jpg` (local, as `previews/` is git-ignored; `tools/reference/sheet.py` rebuilds it
+  from fresh captures). Cam 14, the tenth, was checked at T+130. What it shows:
+  - Close: the mount and pad cameras inside the peach ground cloud, the onboard camera (ground, beach, sea and sun
+    glint), and the framing of every far camera except the paused long lens and tracker.
+  - Off: the far cameras' skies read tan and grey where the mood study's are teal. Our ground is olive and darker
+    where its ground is warm brown. The mood study's clear sky has a few cloud billboards, one behind the pad on
+    the wide shot, and ours has none.
+  - Broken: the tracker dollies in far enough to bring the horizon into frame, and the copy's ground there renders
+    black.
+- **Separation:** the tracker shows the gas ring at T+122 and Cam 14 the second-stage flame at T+130.
+- **Motion:** not judgeable here. Unfocused Studio draws about two frames a second, so fast effects and camera moves
+  need focused Studio or the phone.
+- **Load at liftoff** (launch T+5, mount camera, quality level 8, measured before the ground cloud moved to Puffs):
+  61,873 instances, 3,242 parts, 17 lights on, 14 emitters on (9 since), 53 billboards, 422 beams (405 of them the
+  fence and power-line wires from phase 3). Puffs holds 505 billboards at most (140 ground, 260 contrail, 60 gas,
+  45 flame), and the near cameras now draw the ground cloud's share too. A meaningful MicroProfiler run needs
+  focused Studio on a mid-range laptop.
+- **Fixed during the checks:**
+  - A cut to the mount camera once the vehicle had climbed past its tilt limit aimed at the ground.
+  - The contrail came out in clumps after a seek or a slow frame.
+  - The far cameras' flame showed as beads on the long lens.
+  - The near cameras' ground cloud never reached them; it is Puffs now.
+  - Peach cloud and contrail turned khaki.
+
+**Open after Nov 9** (for the next look pass, with or after Eli's sign-off):
+
+- The tracker's black ground. Ground tiles of the copy go dark once they sit more than about 500 studs from the
+  camera, while static parts out there stay lit. My guess is that Realistic lighting treats the copy as moving
+  parts, since it's re-placed every frame. Glowing tiles in their hazed colour (as above 30 km) fixed the tracker
+  in a test, but not the dark strip at the wide shot's horizon, which needs its own look.
+- The far cameras' sky and ground colour, and the clear sky's cloud billboards.
+- From phases 5 to 7: the blue-hour mount pillar, the morning and marine looks, the MVac heat glow, a curved limb,
+  and floating origin if the onboard shots jitter at full frame rate.
 
 ## Risks to retire early
 

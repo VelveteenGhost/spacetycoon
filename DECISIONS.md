@@ -27,7 +27,16 @@ Newest first. One line of reason each.
 - **Simulate the contrail, the separation gas and the far cameras' ground cloud in Lua (`Puffs`), drawn as
   billboards.** Roblox particles live in one space, so they can't follow the copy's scale and recentring, and real
   ones are hidden by the copy's ground and fogged by real distance. True-space puffs also stay continuous across cuts.
-  The near cameras keep the particle cloud, which looked better up close.
+- **The near cameras see the ground cloud through `Puffs` too; the ground-cloud particle emitters are gone.**
+  Supersedes keeping the particle cloud near the camera. At T+10 and T+20 the mood study's mount and pad cameras sit
+  inside the cloud, and the particle cloud never got there. It also ran on Roblox's particle clock, so a seek or a slow
+  frame left it out of step with the sequence. Puffs is the mood study's own simulation on the sequence's clock.
+- **Puff colours are worked in HDR, and a colour past 0.85 is scaled down whole; each billow also gets a quarter of
+  the smoke ambient.** Clamping each channel at 1 turned the mood study's peach to khaki, and a billboard at 1 draws
+  near white here while the mood study's tone-mapped cloud peaks near 0.85. Its shader fades each billow's shaded
+  side to 0.58 × the ambient, and the baked billows can only darken.
+- **The far cameras' flame chain has twice the mood study's glows (25 inner, 19 outer).** Its glows add together;
+  billboards only blend, so at the long lens's size the cores showed as beads.
 - **Long lenses dolly in, widening the lens, when the vehicle would span under 2° unzoomed.** Roblox culls small parts
   by size and distance whatever the lens, so the tracker showed empty sky at quality level 1; framing at the
   vehicle's depth is unchanged, only the background's perspective shifts.

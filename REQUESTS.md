@@ -12,17 +12,23 @@ Items marked **BLOCKING** stop a whole phase.
    change lives in the Team Create session, so a publish from your Studio picks up all of it. I'll say in each
    update whether there's anything new worth publishing.
 
-**At the phone test (after lighting and effects on the near cameras)**
+**At the phone test (ready now: lighting, effects and the altitude set are in)**
 
 2. **About 15 minutes with the private game on your phone at its default graphics.** Tell me the phone model.
    This is the go/no-go from Nov 8:
    - Does the static fire on the mount and pad cameras read as the same place, light and vehicle as the mood
      study?
-   - Does it stay smooth?
+   - Does it stay smooth, especially at liftoff with the ground cloud at its fullest, and inside the cloud on the
+     mount and pad cameras around T+10 to T+20?
    - Does the press-site shot hold up?
    - Do the flame and glows speckle? The Studio emulator missed that problem in the mood study.
-3. **The look sign-off, beside the mood study.** That call is yours. The deck has the six looks (blue hour,
-   sunrise, morning × clear, broken, marine); blue hour and marine had the least tuning.
+   - Motion is the one thing I can't judge: unfocused Studio draws about two frames a second. Watch the flame, the
+     cloud's spread and the camera moves.
+3. **The look sign-off, beside the mood study.** That call is yours. Start with
+   `previews/port/launch_T+20_sheet.jpg`, which has every camera at T+20 next to the mood study's frame. It's on
+   this machine only, since `previews/` isn't in git. PLAN phase 8 lists what I already see as off: the far skies
+   are too tan and the tracker's ground goes black. The six looks are blue hour, sunrise and morning × clear,
+   broken and marine; blue hour, morning and marine had the least tuning.
 
 **Whenever**
 

@@ -9,12 +9,12 @@ unused ones in the Creator Dashboard. A fixed file goes up as a new revision of 
 | PAD Launch Mount | 138977096256584 | `export/fbx/PAD.fbx` | 1 | 2026-11-08 | `Workspace.Port.PAD` | Verified against the manifest |
 | TWR Service Tower | 86272731500333 | `export/fbx/TWR.fbx` | 1 | 2026-11-08 | `Workspace.Port.TWR` | Verified against the manifest |
 | SITE Kestrel Point | 129671137650864 | `export/fbx/SITE.fbx` (split) | 1 | 2026-11-08 | `Workspace.Port.SITE` and `ServerStorage.PortTemplates` | Verified against the manifest; rig joints stripped except the flag's |
-| FX glow | 87877243907028 | `art/effects/glow.png` | 1 | 2026-11-09 | `Look`/`Effects` (by ID) | Flame halo, lamp and beacon glows |
-| FX billow A | 92443369380936 | `art/effects/billow_a.png` | 1 | 2026-11-09 | `Look`/`Effects` (by ID) | Lit exhaust billow |
-| FX billow B | 84261181024933 | `art/effects/billow_b.png` | 1 | 2026-11-09 | `Look`/`Effects` (by ID) | Lit exhaust billow |
-| FX billow C | 99218850171999 | `art/effects/billow_c.png` | 1 | 2026-11-09 | `Look`/`Effects` (by ID) | Lit exhaust billow |
-| FX billow soft | 129350902832508 | `art/effects/billow_soft.png` | 1 | 2026-11-09 | `Look`/`Effects` (by ID) | Ground-cloud billow |
-| FX puff | 102549625842700 | `art/effects/puff.png` | 1 | 2026-11-09 | `Look`/`Effects` (by ID) | Vent steam |
+| FX glow | 87877243907028 | `art/effects/glow.png` | 1 | 2026-11-09 | `Effects`, `Glows`, `Puffs` (by ID) | Flame halo, lamp and beacon glows, the far cameras' flame |
+| FX billow A | 92443369380936 | `art/effects/billow_a.png` | 1 | 2026-11-09 | `Puffs` (by ID) | Lit exhaust billow: ground cloud and contrail |
+| FX billow B | 84261181024933 | `art/effects/billow_b.png` | 1 | 2026-11-09 | `Puffs` (by ID) | Lit exhaust billow: ground cloud and contrail |
+| FX billow C | 99218850171999 | `art/effects/billow_c.png` | 1 | 2026-11-09 | `Puffs` (by ID) | Lit exhaust billow: ground cloud and contrail |
+| FX billow soft | 129350902832508 | `art/effects/billow_soft.png` | 1 | 2026-11-09 | none | Was the particle ground cloud's; unused since Puffs draws the cloud (Nov 9). Archive |
+| FX puff | 102549625842700 | `art/effects/puff.png` | 1 | 2026-11-09 | `Effects`, `Puffs` (by ID) | Vent steam, fire, separation gas |
 | FX flame | 125011676503064 | `art/effects/flame.png` | 1 | 2026-11-09 | `Look`/`Effects` (by ID) | Flame tongue; white-hot end at the top, so emitters use Rotation 180 |
 | FX plume streak | 119359214952709 | `art/effects/plume_streak.png` | 1 | 2026-11-09 | `Look`/`Effects` (by ID) | Plume beam, hot at the left (U = 0) |
 | FX contrail | 101788017573609 | `art/effects/contrail.png` | 1 | 2026-11-09 | `Look`/`Effects` (by ID) | Contrail beam, tiles along U |

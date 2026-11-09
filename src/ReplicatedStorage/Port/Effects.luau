@@ -4,10 +4,10 @@
 -- - The flame is two fast emitters locked to the nozzle: a particle crosses the flame's length in its lifetime, so
 --   colour over life becomes colour along the flame (white-hot at the exits, orange at the tail).
 -- - The plume core and glow are Beams with the streak texture; nine short beams are the engine jets.
--- - The ground cloud, fire, vents and ice are world-space emitters whose rates and speeds follow the sequence.
+-- - Fire, vents and ice are world-space emitters whose rates and speeds follow the sequence.
 -- - A flame light sits under the mount on the pad, then rides below the plume.
 --
--- Real space only for now: the far cameras' copy doesn't carry effects yet (PLAN.md, phase 6).
+-- Real space only: the ground cloud, the contrail and the far cameras' flame are `Puffs`, which every camera sees.
 
 local Workspace = game:GetService("Workspace")
 
@@ -20,10 +20,6 @@ Effects.__index = Effects
 local S = 1 / 0.28
 local TEX = {
 	glow = "rbxassetid://87877243907028",
-	billowA = "rbxassetid://92443369380936",
-	billowB = "rbxassetid://84261181024933",
-	billowC = "rbxassetid://99218850171999",
-	billowSoft = "rbxassetid://129350902832508",
 	puff = "rbxassetid://102549625842700",
 	flame = "rbxassetid://125011676503064",
 	plume = "rbxassetid://119359214952709",
@@ -112,22 +108,6 @@ local function beam(parent, name, a0, a1, props)
 	end
 	b.Parent = parent
 	return b
-end
-
--- Lit billows for the ground cloud: grow fast then slowly, ease in, hold, fade.
-local function billow(parent, name, tex, s0, s1, alpha)
-	return emitter(parent, name, {
-		Texture = tex,
-		LightEmission = 0,
-		LightInfluence = 1,
-		Orientation = Enum.ParticleOrientation.FacingCameraWorldUp,
-		Size = ns({ { 0, s0 * S, s0 * S * 0.2 }, { 0.3, lerp(s0, s1, 0.6) * S, s1 * S * 0.15 }, { 1, s1 * S, s1 * S * 0.2 } }),
-		Transparency = ns({ { 0, 1 }, { 0.08, 1 - alpha }, { 0.5, 1 - alpha }, { 1, 1 } }),
-		Rotation = NumberRange.new(-15, 15),
-		RotSpeed = NumberRange.new(-2, 2),
-		Drag = 0.42,
-		ZOffset = 0,
-	})
 end
 
 function Effects.new(port)
@@ -245,47 +225,6 @@ function Effects.new(port)
 		Transparency = ns({ { 0, 0.35 }, { 0.5, 0.75 }, { 1, 1 } }),
 		Rotation = NumberRange.new(0, 360),
 	})
-
-	-- ground cloud: out of the trench, a ring around the mount, columns at the mount, and both sides
-	local wind = WIND * 0.42 * S -- drag 0.42 settles the puffs to the wind speed
-	local trench = part("TrenchFX", Vector3.new(7, 1, 58) * S, folder)
-	trench.CFrame = CFrame.new(0, 2.5 * S, 43 * S)
-	self.trench = billow(trench, "Trench", TEX.billowA, 13, 53, 0.96)
-	self.trench.EmissionDirection = Enum.NormalId.Back
-	self.trench.SpreadAngle = Vector2.new(12, 18)
-	self.trench.Speed = NumberRange.new(25 * S, 60 * S)
-	self.trench.Lifetime = NumberRange.new(20, 30)
-	self.trench.Acceleration = wind + Vector3.new(0, 0.25 * S, 0)
-
-	local ring = part("RingFX", Vector3.new(2, 1, 2) * S, folder)
-	ring.CFrame = CFrame.new(0, 2.5 * S, 0)
-	self.ring = billow(ring, "Ring", TEX.billowB, 10, 48, 0.95)
-	self.ring.EmissionDirection = Enum.NormalId.Front
-	self.ring.SpreadAngle = Vector2.new(5, 180)
-	self.ring.Lifetime = NumberRange.new(18, 26)
-	self.ring.Acceleration = wind + Vector3.new(0, 0.2 * S, 0)
-
-	local column = part("ColumnFX", Vector3.new(8, 4, 8) * S, folder)
-	column.CFrame = CFrame.new(0, 7 * S, 0)
-	self.column = billow(column, "Column", TEX.billowSoft, 6, 32, 0.88)
-	self.column.EmissionDirection = Enum.NormalId.Top
-	self.column.SpreadAngle = Vector2.new(25, 25)
-	self.column.Speed = NumberRange.new(2 * S, 5 * S)
-	self.column.Lifetime = NumberRange.new(15, 22)
-	self.column.Acceleration = wind + Vector3.new(0, 0.5 * S, 0)
-
-	self.sides = {}
-	for _, sg in { 1, -1 } do
-		local side = part("SideFX", Vector3.new(1, 1, 10) * S, folder)
-		side.CFrame = CFrame.new(sg * 9 * S, 2.5 * S, 0)
-		local e = billow(side, "Side", TEX.billowC, 10, 50, 0.95)
-		e.EmissionDirection = sg > 0 and Enum.NormalId.Right or Enum.NormalId.Left
-		e.SpreadAngle = Vector2.new(8, 20)
-		e.Speed = NumberRange.new(18 * S, 40 * S)
-		e.Lifetime = NumberRange.new(20, 28)
-		e.Acceleration = wind + Vector3.new(0, 0.25 * S, 0)
-		table.insert(self.sides, e)
-	end
 
 	-- steam vents: world positions and directions from the mood study, on the parts that carry them
 	local veh, twr, padModel = port.VEH, port.TWR, port.PAD
@@ -490,17 +429,6 @@ function Effects:update(st, t, camPos, mode)
 	self.fireDown.Color, self.fireTrench.Color = fireCol, fireCol
 	self.fireDown.Brightness = 4 * math.max(thrust, green * 0.4)
 	self.fireTrench.Brightness = self.fireDown.Brightness
-
-	-- ground cloud: the pad feeds it until the vehicle is a few hundred metres up
-	local gf = thrust * (1 - smooth(110, 420, alt))
-	local push = 1 + smooth(8, 30, alt) * 1.1 -- once the plume hits the pad directly it blasts outward
-	self.trench.Rate = 7 * gf
-	self.ring.Rate = 5 * gf
-	self.ring.Speed = NumberRange.new(12 * push * S, 26 * push * S)
-	self.column.Rate = alt < 30 and 3 * gf or 0
-	for _, e in self.sides do
-		e.Rate = 3 * gf
-	end
 
 	-- vents: until the count reaches T-3; the fuel arm's stops as it swings clear
 	for _, v in self.vents do

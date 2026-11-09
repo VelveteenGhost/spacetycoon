@@ -1,8 +1,8 @@
--- Exhaust puffs every camera has to see from wherever it is (PLAN.md phases 6 and 7): the contrail, the separation
--- gas, and the ground cloud as the far cameras see it. They're simulated in Lua in true space, as the mood study does,
--- and drawn as billboards placed into whichever space is live: real near the camera, the far-camera copy beyond it.
--- True-space simulation keeps them continuous across cuts and through the copy's rescales, which Roblox particles,
--- emitted into one space, can't do. The near cameras see the ground cloud as particles instead (Effects).
+-- Exhaust puffs every camera has to see from wherever it is (PLAN.md phases 6 and 7): the ground cloud, the contrail
+-- and the separation gas. They're simulated in Lua in true space, as the mood study does, and drawn as billboards
+-- placed into whichever space is live: real near the camera, the far-camera copy beyond it. True-space simulation
+-- keeps them continuous across cuts and through the copy's rescales, which Roblox particles, emitted into one space,
+-- can't do. It also runs on the sequence's clock, so a seek lands on the same cloud a full run would.
 --
 -- Billboards ignore lighting and Atmosphere, so each puff is coloured here: sunlit by height (the sun sets later
 -- the higher you are), shaded as one mass, warmed by the flame and the floods, and faded into the haze.
@@ -27,7 +27,7 @@ local NOZZLE_Y = 8
 -- to cover the gap, so the count stays flat while the trail lasts minutes
 local TRAIL_TIERS, TRAIL_GROW = { 6, 16, 36, 70 }, 1.42
 -- The mood study keeps 720 ground and 680 trail puffs; a phone gets fewer and bigger ones.
-local CAPS = { ground = 140, trail = 200, gas = 60 }
+local CAPS = { ground = 140, trail = 260, gas = 60 }
 local GROUND_K = 0.16 -- of the mood study's spawn rates, to fit the cap
 local GROUND_GROW = 1.5 -- and bigger puffs to keep the mass
 
@@ -43,24 +43,34 @@ local function lerp(a, b, t)
 end
 
 local function add(a, b)
-	return Color3.new(math.min(1, a.R + b.R), math.min(1, a.G + b.G), math.min(1, a.B + b.B))
+	return Color3.new(a.R + b.R, a.G + b.G, a.B + b.B)
 end
 
 local function scale(c, k)
-	return Color3.new(math.min(1, c.R * k), math.min(1, c.G * k), math.min(1, c.B * k))
+	return Color3.new(c.R * k, c.G * k, c.B * k)
+end
+
+-- The mood study lights its puffs in HDR and tone-maps them, so its brightest cloud lands near 0.85, while a billboard
+-- at 1 draws near white here. Clipping each channel would turn a bright peach yellow, so a colour past 0.85 is scaled
+-- down whole.
+local TOP = 0.85
+local function fit(c)
+	local m = math.max(c.R, c.G, c.B)
+	return m > TOP and Color3.new(c.R * TOP / m, c.G * TOP / m, c.B * TOP / m) or c
 end
 
 -- the far cameras' flame, as the mood study builds it: { distance down the plume, size, HDR colour, opacity } at sea
 -- level for a white-hot inner chain and a wider orange outer one, packed closer than their bright cores so they read
--- as one tongue, and the warm halo
+-- as one tongue, and the warm halo. The mood study adds its glows together; billboards only blend, so the chains are
+-- twice as dense as its 13 and 10 or the cores show as beads.
 local FLAME = {}
-for i = 0, 12 do
-	local u = i / 12
+for i = 0, 24 do
+	local u = i / 24
 	table.insert(FLAME, { 0.4 + u * 27, lerp(4.6, 3.2, u),
 		Color3.new(lerp(32, 9, u), lerp(26, 4.6, u * u * 0.6 + u * 0.4), lerp(16, 1.4, math.sqrt(u))), lerp(0.95, 0.55, u) })
 end
-for i = 0, 9 do
-	local u = i / 9
+for i = 0, 18 do
+	local u = i / 18
 	table.insert(FLAME, { 1 + u * 46, lerp(6.6, 10, u), Color3.new(lerp(10, 1.2, u), lerp(5, 0.45, u), lerp(1.4, 0.1, u)),
 		lerp(0.5, 0.2, u) })
 end
@@ -80,7 +90,7 @@ local function makePool(n, kind)
 		local img = Instance.new("ImageLabel")
 		img.BackgroundTransparency = 1
 		img.Size = UDim2.fromScale(1, 1)
-		img.Image = kind == "gas" and PUFF or BILLOWS[(i - 1) % 3 + 1]
+		img.Image = kind == "flame" and GLOW or kind == "gas" and PUFF or BILLOWS[(i - 1) % 3 + 1]
 		img.Parent = gui
 		att.Parent = Workspace.Terrain
 		table.insert(pool, { att = att, gui = gui, img = img, on = false, pos = Vector3.zero, vel = Vector3.zero })
@@ -94,10 +104,9 @@ function Puffs.new()
 	self.ground = makePool(CAPS.ground, "ground")
 	self.trail = makePool(CAPS.trail, "trail")
 	self.gas = makePool(CAPS.gas, "gas")
-	self.flame = makePool(#FLAME, "gas")
+	self.flame = makePool(#FLAME, "flame")
 	for i, f in FLAME do
 		local p = self.flame[i]
-		p.img.Image = GLOW
 		local m = math.max(f[3].R, f[3].G, f[3].B)
 		p.d, p.s, p.col, p.peak, p.op, p.halo = f[1], f[2], Color3.new(f[3].R / m, f[3].G / m, f[3].B / m), m, f[4], f.halo
 	end
@@ -217,12 +226,14 @@ function Puffs:update(st, dt, t, look, view)
 			local lenS = (0.35 + 0.65 * thrust) * (0.65 + 1.5 * smooth(60, 3000, alt)) * (1 + alt / 30000)
 			local flameLen = 48 * lenS
 			local s0 = 14 + alt * 0.004
-			acc.trail += math.clamp(st.vel / (s0 * 0.3) + 8, 8, 18) * dt
+			acc.trail += math.clamp(st.vel / (s0 * 0.3) + 8, 8, 24) * dt
 			local side = stack.RightVector
 			local zAxis = stack.LookVector
-			while acc.trail >= 1 do
-				acc.trail -= 1
-				local a, back = r:NextNumber() * math.pi * 2, r:NextNumber() * st.vel * dt
+			local n = math.floor(acc.trail)
+			acc.trail -= n
+			for i = 1, n do
+				-- evenly along the step's path, so a coarse step (a seek, a slow frame) leaves no clumps
+				local a, back = r:NextNumber() * math.pi * 2, (i - r:NextNumber()) / n * st.vel * dt
 				local pos = nozzle + down * (flameLen * 0.75 + r:NextNumber() * 6 + back)
 					+ side * math.cos(a) * 1.5 + zAxis * math.sin(a) * 1.5
 				local vel = down * (6 + r:NextNumber() * 6)
@@ -258,7 +269,7 @@ function Puffs:update(st, dt, t, look, view)
 	local glowI = thrust * (alt < 25 and 1 or 0.7)
 	for _, kind in { "ground", "trail", "gas" } do
 		local pool = self[kind]
-		local show = drawing and (kind ~= "ground" or view.far)
+		local show = drawing
 		for _, p in ipairs(pool) do
 			if not p.on then
 				continue
@@ -349,6 +360,11 @@ function Puffs:update(st, dt, t, look, view)
 					col = add(col, scale(C.floodWarm, look.flood * 0.12))
 				end
 			end
+			if kind ~= "gas" then
+				-- the mood study's shader fades each billow's shaded side to its shadow colour (0.58 of the ambient);
+				-- the baked billows can only darken, so add that colour's average share
+				col = add(col, scale(look.amb, 0.25))
+			end
 			if glowI > 0 and kind ~= "gas" then
 				local r2 = alt < 25 and 8100 or 6400
 				local d2 = (p.pos - flamePos).Magnitude ^ 2
@@ -360,7 +376,7 @@ function Puffs:update(st, dt, t, look, view)
 			local pos, k = view.place(p.pos * S)
 			p.att.WorldPosition = pos
 			p.gui.Size = UDim2.new(size * S * k, 0, size * S * k, 0)
-			p.img.ImageColor3 = col
+			p.img.ImageColor3 = fit(col)
 			p.img.ImageTransparency = 1 - opacity
 			p.img.Rotation = view.sunAngle + p.jit
 			p.gui.Enabled = opacity > 0.004
@@ -389,7 +405,7 @@ function Puffs:update(st, dt, t, look, view)
 			f.gui.Size = UDim2.new(size * S * k, 0, size * S * k, 0)
 			f.img.ImageColor3 = f.col
 			f.img.ImageTransparency = 1 - f.op
-			f.gui.Brightness = f.peak * (f.halo and thrust / (1 + alt / 6000) or hot) * 0.25
+			f.gui.Brightness = f.peak * (f.halo and 2 * thrust / (1 + alt / 6000) or hot) * 0.45 -- white-hot core, soft halo
 		end
 	end
 end

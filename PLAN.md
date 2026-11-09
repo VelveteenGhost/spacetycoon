@@ -32,6 +32,7 @@ Each phase ends on a check, and the next one starts only after it passes.
 | 2 | Import PAD, TWR, SITE | All templates | Same checks, per mesh, against the manifest |
 | 3 | Scene assembly | Whole site placed, ground and sea | Guide's scale checks; stills from all ten camera positions |
 | 4 | Cameras, timeline, HUD | T−30 to T+25 plays on the pad set | Each camera matches its mood-study frame side by side |
+| 4b | Far-camera proxy | Scaled copy of the complex for the far cameras | Press, coast, wide and tracker show the pad at quality Level 1 |
 | 5 | Lighting | Sunrise, morning and night; three skies; floods | Static-fire still beside the mood study |
 | 6 | Effects | Flame, ground cloud, vents, ice, beacons, surf | Liftoff at full ground cloud holds frame rate on a phone |
 | 7 | Altitude set | Max-Q through stage-2 ignition, T+25 to T+136 | Separation reads; MVac hidden until the stages part |
@@ -109,6 +110,18 @@ with one SurfaceAppearance each. Asset IDs are tracked in `ASSETS.md`.
 
 ### 3. Scene assembly
 
+**Done, Nov 8.** `src/ServerStorage/PortTools/SceneBuilder.luau` builds the set in 35 s and can be re-run:
+`require(game.ServerStorage.PortTools.SceneBuilder:Clone()).build()`.
+
+- Placed by the manifest's rules: 3 masts with their catenaries and guys, 4 flood poles, 34 cars in their paint
+  mix, 145 fence posts with 288 rails, 40 power poles with 117 sagging conductors, and 3 distant pads.
+- The 1,600 scrub and palmetto come from the mood study's own mulberry32 stream. The Luau port matches a Python
+  reference value for value, and no plant lands in the props' fallback zones, so the stream and the layout match.
+- Ground: 770 flat land tiles out to 12 km, roads, the car park and two pad-side service buildings. The dune and
+  beach are Terrain, and the sea is Terrain water out to 6 km (about 97 million cells; check its memory on a phone).
+- Still open: surf foam and a gentler waterline (effects), and hand-placed tree clumps near cameras if the shots
+  need them.
+
 A re-runnable `SceneBuilder` clears and rebuilds `Workspace.Port` from the templates and the manifest. It runs at
 edit time, so the set can be walked in Studio and the place saves the result. Every part is positioned from its
 manifest world box and pivot, whatever the importer did.
@@ -136,6 +149,38 @@ HUD.
 - Cameras: the guide's ten, scriptable and smoothed, with a lead on the vehicle's velocity and shake delayed by
   the speed of sound. Narrower than 1°: move the camera closer along the same line of sight.
 - HUD: a ScreenGui with the LIVE tag, camera name, telemetry, T-clock and lower third.
+
+**Progress, Nov 8.** The Director (`StarterPlayerScripts/Director`) with the `Flight`, `BroadcastCameras` and
+`Hud` modules runs the hold, static fire and launch, flies the vehicle, swings the fuel arm and clamps, waves the
+flag, cuts between all ten cameras and drives the HUD. A small deck lets you pick the sequence by touch.
+
+- Checked against 63 reference frames rendered from the mood study (`tools/reference/`):
+  - Fixed cameras: positions exact, FOV within 0.001°, aim within 0.22°.
+  - Onboard: within 0.08°, and within 1.5 m at 870 m altitude.
+  - Drone: its orbit phase differs by design.
+- The launch loops at T+34 until the altitude set exists (phase 7). The exposure dip at ignition moves to
+  lighting.
+
+**Found, Nov 8: Roblox culls distant objects by graphics quality.**
+
+- Measured with the Atmosphere off: at quality Level 1 the launch complex is gone by 2,000 studs, and at Level 10
+  by 6,000. Only near the top level (21) does it show from the press site, 10,064 studs out.
+- Phones run low to middle levels, and game scripts can't raise them. That would empty the long lens (about 5,000
+  studs), press, coast, wide and tracker shots, and the drone at low levels. Large parts such as the land tiles
+  and Terrain still draw.
+
+### 4b. Far-camera proxy
+
+The fix keeps the mood study's camera positions. When a far camera is live, the Director shows a client-side copy
+of the launch complex scaled about the camera: each point P goes to C + s(P − C), with s chosen so the copy sits
+within draw distance. From that camera it looks identical, the same size and position on screen.
+
+- The real complex is hidden while the copy shows.
+- The vehicle, fuel arm and clamps drive both.
+- Phase 6 effects get scaled emitters for the copy.
+- Per-camera haze (phase 5) makes up for the shorter real distance. The mood study already retunes haze per shot.
+- To settle first: the safe copy distance at Level 1, and a scaled ground patch under the copy, so its shadows
+  land on its own ground.
 
 ### 5. Lighting
 
@@ -175,8 +220,8 @@ mid-range laptop, and Eli looking at the flame and glows on a real phone.
 
 - **Import fidelity.** Answered by the VEH pilot: names, pivots and single-material maps survive. Scale and yaw
   are fixed by script, and two-material meshes must be split before upload (phase 1).
-- **Far geometry.** Tree tiles sit up to 23,800 studs out and Cam 2 at about 40,000. Position jitter and
-  distance culling show up in the phase 3 stills; the guide's altitude set already covers the flight.
+- **Far geometry.** Confirmed: the draw distance depends on the quality level and is short on phones. Phase 4b
+  adds the far-camera proxy. Tree tiles sit up to 23,800 studs out and Cam 2 at about 40,000.
 - **Phone budget.** About 342,000 triangles as placed, 1,600 vegetation instances, then particles on top. Shared
   meshes keep the vegetation cheap, and phase 6 measures the worst case.
 - **Lighting.Technology isn't scriptable over MCP.** Reading it fails with a capability error, so Eli sets Future by

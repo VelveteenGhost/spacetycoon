@@ -4,6 +4,22 @@ Newest first. One line of reason each.
 
 ## 2026-11-08
 
+- **Far cameras get a scaled proxy of the launch complex rather than new camera positions.** Roblox stops
+  drawing the complex beyond 2,000–6,000 studs at the quality levels phones use, and scripts can't change that.
+  A copy scaled about the camera keeps the mood study's framing and foregrounds exactly; moving cameras in would
+  change both.
+- **Land is 770 flat parts, while the dune, beach and sea are Terrain.** Flat Terrain at 24 × 20 km would be
+  heavy for a phone, and parts match the mood study's flat ground plane. The coast needs Terrain's water and
+  sub-voxel dune crest.
+- **The Director runs on the client and takes test commands as attributes (Sequence, Camera, SeekT, Paused,
+  Motion).** It's a single-viewer cinematic, and the attributes let a playtest jump to any frame for the
+  numeric checks against the reference.
+- **The launch loops at T+34 until phase 7 builds the altitude set.** Past about T+30 the vehicle leaves the pad
+  set's true-scale range, and the director's later cuts belong to the altitude set.
+- **Keep the reference tooling and `frames.json` in `tools/reference/`; the PNGs stay in the ignored
+  `previews/`.** The 64 PNGs come to over 100 MB, while the camera states are 27 KB and are what the checks use.
+- **Push code into Studio over MCP with a length and Adler-32 checksum check.** The Assistant's HTTP allowlist
+  blocks a localhost sync, and the checksum proves Studio runs exactly what's in git.
 - **Strip the importer's rig from SITE, but keep the flag's RootPart, bones, Motor6D and AnimationController in
   their own `Flag` model.** 208 joints on static props are clutter and would tie moved copies back to the root.
   The flag still needs its skeleton for the wave.

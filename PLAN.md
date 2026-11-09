@@ -25,6 +25,10 @@ Sources:
 
 Each phase ends on a check, and the next one starts only after it passes.
 
+**Order from Nov 9:** lighting and effects on the near cameras (mount, pad, onboard) come first, then Eli's phone
+test as the go/no-go for Roblox, then the far-camera polish, the scaled-space effects and the altitude set. The
+real risk is how the near shots look on a phone at default quality, not draw distance, which the copy solves.
+
 | # | Phase | Output | Check |
 | --- | --- | --- | --- |
 | 0 | Setup | Repo layout, place settings, generated manifest module | Place opens clean, no avatar, no errors |

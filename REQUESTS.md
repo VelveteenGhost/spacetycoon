@@ -7,30 +7,32 @@ Items marked **BLOCKING** stop a whole phase.
 
 **Now**
 
-1. **BLOCKING lighting: set Lighting.Technology to Future.** Select Lighting in the Explorer, then change
-   Technology in Properties. It takes 30 seconds; MCP scripts can't write this property. Lighting is the next
-   phase.
-2. **OK to upload about 10 effect textures as images.** They're the billows, flame glow, plume streak, ice-shard
-   flipbook, contrail, lamp glow and foam. They become permanent assets on your account, like the meshes, but
-   images don't cost Robux. Needed for effects, the phase after lighting.
-3. **Publishing: should I publish the place to the private game at each checkpoint, or will you?** Your phone
-   only gets what's published. The game stays private; each publish is a new version in the place's history.
-   Needed before the phone test.
+1. **Publish the place when you want the phone build: File > Publish to Roblox in Studio.** You OK'd me publishing,
+   but I can't: Open Cloud publishes only from a place file, and MCP has no way to save one out of Studio. Every
+   change lives in the Team Create session, so a publish from your Studio picks up all of it. I'll say in each
+   update whether there's anything new worth publishing.
 
 **At the phone test (after lighting and effects on the near cameras)**
 
-4. **About 15 minutes with the private game on your phone at its default graphics.** Tell me the phone model.
+2. **About 15 minutes with the private game on your phone at its default graphics.** Tell me the phone model.
    This is the go/no-go from Nov 8:
    - Does the static fire on the mount and pad cameras read as the same place, light and vehicle as the mood
      study?
    - Does it stay smooth?
    - Does the press-site shot hold up?
    - Do the flame and glows speckle? The Studio emulator missed that problem in the mood study.
-5. **The look sign-off, beside the mood study.** That call is yours.
+3. **The look sign-off, beside the mood study.** That call is yours. The deck has the six looks (blue hour,
+   sunrise, morning × clear, broken, marine); blue hour and marine had the least tuning.
 
 **Whenever**
 
-6. **Merge PR #2 into `main`,** and tell me whether to push `studio-port` and open a PR for it.
+4. **Merge PR #2 into `main`,** and tell me whether to push `studio-port` and open a PR for it.
+
+## Answered Nov 9
+
+- ~~Set Lighting.Technology to Future~~: you set the new LightingStyle to Realistic instead; lighting is built on it.
+- ~~OK to upload effect textures~~: approved; 11 effect images and the sky faces are up (ASSETS.md).
+- ~~Who publishes~~: you OK'd me, but I can't from MCP (item 1).
 
 ## 2026-11-08 (done)
 

@@ -21,6 +21,7 @@ local Hud = require(Port:WaitForChild("Hud"))
 local FarProxy = require(Port:WaitForChild("FarProxy"))
 local Look = require(Port:WaitForChild("Look"))
 local Glows = require(Port:WaitForChild("Glows"))
+local Effects = require(Port:WaitForChild("Effects"))
 
 local S = 1 / 0.28
 local PAD_SET_END = 34 -- the launch loops here until the altitude set (phase 7) takes over at about T+25
@@ -90,6 +91,7 @@ local proxy = FarProxy.new({
 	{ model = port:WaitForChild("Lights"), name = "Lights" },
 })
 local glows = Glows.new(port)
+local effects = Effects.new(port) -- after the copy is made: the far cameras don't carry effects yet
 
 -- Thrust history: sound and shake reach each camera at the speed of sound.
 local hist = {}
@@ -132,6 +134,7 @@ end
 
 local function startSeq(mode)
 	st = Flight.new(mode)
+	effects:reset()
 	hist = {}
 	rig.aimSnap = true
 	holdT = 0
@@ -298,6 +301,7 @@ RunService:BindToRenderStep("PortDirector", Enum.RenderPriority.Camera.Value + 1
 	if rig.mode == "press" then
 		waveFlag(t)
 	end
+	effects:update(st, t, camera.CFrame.Position, rig.mode)
 
 	-- look: a full re-apply when the sun, sky, shot or proxy changes, and a few times a second for the haze thinning
 	-- with altitude; the exposure dip follows the engines every frame

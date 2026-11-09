@@ -230,13 +230,28 @@ test. Tune with two captures per change: Studio renders lazily when it isn't foc
 
 ### 6. Effects
 
-- First, author the effect textures that aren't in `export/` yet: three top-lit billows, a flame glow, a plume
-  streak, a four-shape ice-shard flipbook, a contrail Beam texture, a lamp glow and a foam strip. Upload them as
-  Images.
-- Then build in the guide's order: flame tongue, shock diamonds and halo; ground cloud; vents; ice shedding;
-  beacons; surf.
-- Check at the busiest moment, liftoff with the ground cloud at its fullest. Use the MicroProfiler for frame time
-  and count triangles, lights and live particles.
+**Status Nov 9: near-camera effects in place** (`Effects`, real space), driven by the Flight state each frame:
+
+- Flame: two fast emitters locked to the nozzle frame, so colour over life lands along the flame; HDR brightness
+  and bloom make it white-hot. Plume core and glow Beams fade when seen end-on, as in the mood study; nine jet
+  Beams; shock diamonds at sea level; a warm halo; the green flash at ignition.
+- Fire tongues down from the exits and out along the trench; a flame light under the mount, then riding the plume.
+- Ground cloud from the trench, a ring at the mount, columns and both sides: lit billow textures, drag and wind.
+- Vents at the vehicle, the mount and the fuel arm (stopping as the arm swings clear); ice shed from both frost
+  bands at ignition, a Grid2x2 flipbook that flutters.
+- Textures: `art/effects/`, uploaded (ASSETS.md).
+
+Checked as stills on the mount and pad cameras (static fire T+3, launch T+4). Unfocused, Studio runs particles at
+about a ninth of real time, so fast ones (the flame) clump in captures and the cloud takes minutes to mature; the
+motion needs a look at full frame rate, in focused Studio or on the phone.
+
+Open, after the phone test:
+- **Far cameras (drone and beyond) don't show effects yet.** They see the far-camera copy, whose ground plane hides
+  real particles below eye level, and the real distance fogs them out. Plan: simulate the ground cloud, contrail and
+  separation gas as puffs in Lua in true space (as the mood study does) and draw them as billboards mapped into
+  whichever space is live; flame glows the same way. That also keeps the cloud continuous across cuts.
+- Surf foam on the shoreline.
+- MicroProfiler at liftoff with the cloud at its fullest.
 
 ### 7. Altitude set
 

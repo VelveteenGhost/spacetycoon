@@ -22,9 +22,9 @@ local FarProxy = require(Port:WaitForChild("FarProxy"))
 local Look = require(Port:WaitForChild("Look"))
 local Glows = require(Port:WaitForChild("Glows"))
 local Effects = require(Port:WaitForChild("Effects"))
+local Puffs = require(Port:WaitForChild("Puffs"))
 
 local S = 1 / 0.28
-local PAD_SET_END = 34 -- the launch loops here until the altitude set (phase 7) takes over at about T+25
 local SEEK_STEP = 1 / 30
 
 local port = Workspace:WaitForChild("Port")
@@ -91,7 +91,8 @@ local proxy = FarProxy.new({
 	{ model = port:WaitForChild("Lights"), name = "Lights" },
 })
 local glows = Glows.new(port)
-local effects = Effects.new(port) -- after the copy is made: the far cameras don't carry effects yet
+local effects = Effects.new(port) -- after the copy is made, which doesn't carry particles
+local puffs = Puffs.new()
 
 -- Thrust history: sound and shake reach each camera at the speed of sound.
 local hist = {}
@@ -135,6 +136,7 @@ end
 local function startSeq(mode)
 	st = Flight.new(mode)
 	effects:reset()
+	puffs:reset()
 	hist = {}
 	rig.aimSnap = true
 	holdT = 0
@@ -158,8 +160,15 @@ end
 
 local function seek(target)
 	startSeq(st.mode)
+	local since = 0
 	while st.tRel < target do
-		Flight.step(st, math.min(SEEK_STEP, target - st.tRel))
+		local step = math.min(SEEK_STEP, target - st.tRel)
+		Flight.step(st, step)
+		since += step
+		if since >= 0.25 or st.sepBurst then -- the puffs catch up in coarse steps, so the contrail is there
+			puffs:update(st, since, 0)
+			since = 0
+		end
 	end
 	rig.aimSnap = true
 end
@@ -252,8 +261,8 @@ RunService:BindToRenderStep("PortDirector", Enum.RenderPriority.Camera.Value + 1
 	countdown -= dt
 	Flight.step(st, dt)
 
-	-- The launch loops at the pad set's limit for now; the static fire runs its full length.
-	local endT = st.mode == "launch" and PAD_SET_END or (st.mode == "static" and Flight.LENGTH.static - Flight.LEAD)
+	-- Both sequences run their full length, then start again.
+	local endT = st.mode ~= "hold" and Flight.LENGTH[st.mode] - Flight.LEAD
 	if endT then
 		cutAlpha = Flight.smooth(endT - 0.55, endT, st.tRel)
 		if st.tRel > endT then
@@ -289,11 +298,13 @@ RunService:BindToRenderStep("PortDirector", Enum.RenderPriority.Camera.Value + 1
 	local heard = rig.mode == "onboard" and st.thrust or thrustAt(t - ((rig.pos or nozzle) - nozzle).Magnitude / 343)
 	local vp = camera.ViewportSize
 	local motion = port:GetAttribute("Motion") ~= false
+	rig.minSpan = port:GetAttribute("MinSpan") -- test override for Cams.MIN_SPAN
 	local cf, fov, label = Cams.update(rig, st, t, dt, heard, vp.X / math.max(vp.Y, 1), motion)
 	camera.CameraType = Enum.CameraType.Scriptable
 	camera.FieldOfView = fov
 	camera.CFrame = toStuds(cf)
 	if port:GetAttribute("Proxy") ~= false then
+		proxy:setGroundGlow((rig.lensPos or rig.pos).Y > Look.SPACE_ALT)
 		proxy:update(camera.CFrame.Position, Vector3.zero, rig.mode, stack.Position)
 	elseif proxy.active then
 		proxy:deactivate()
@@ -307,11 +318,13 @@ RunService:BindToRenderStep("PortDirector", Enum.RenderPriority.Camera.Value + 1
 	-- with altitude; the exposure dip follows the engines every frame
 	local cc = Cams.CAMS[rig.mode]
 	local key = sunPreset .. wxPreset .. rig.mode .. tostring(proxy.active)
+		.. tostring((rig.lensPos or rig.pos).Y > Look.SPACE_ALT)
 	lookT += rawDt
 	if key ~= lookKey or lookT > 0.25 then
 		lookKey, lookT = key, 0
 		local flood = Look.apply({
 			sun = sunPreset,
+			camAlt = (rig.lensPos or rig.pos).Y,
 			elev = Look.PRESETS[sunPreset],
 			wx = wxPreset,
 			camFog = cc.fog,
@@ -333,6 +346,30 @@ RunService:BindToRenderStep("PortDirector", Enum.RenderPriority.Camera.Value + 1
 	end
 	glows:update(t, camera.CFrame.Position, proxy.active and proxy.scale or nil, Look.flood, Look.elev, Look.fogDensity)
 
+	-- exhaust puffs: real within the copy's hole around the camera, in the copy beyond it
+	local camPos = camera.CFrame.Position
+	local sc = proxy.active and proxy.scale or nil
+	local sunCam = camera.CFrame:VectorToObjectSpace(Look.sunDir)
+	puffs:update(st, dt, t, {
+		elev = Look.elev,
+		sun = Look.sunFactor,
+		amb = Look.smokeAmb,
+		fog = Look.fogDensity,
+		fogCol = Look.fogColor,
+		flood = Look.flood,
+		sunDir = Look.sunDir,
+	}, {
+		camM = camPos / S,
+		place = function(p)
+			if sc and (p - camPos).Magnitude > FarProxy.HOLE then
+				return camPos + (p - camPos) * sc, sc
+			end
+			return p, 1
+		end,
+		far = proxy.active,
+		sunAngle = Look.elev > -1 and math.deg(math.atan2(sunCam.X, sunCam.Y)) or 0,
+	})
+
 	-- HUD
 	hud:layout(vp)
 	hud:setCut(cutAlpha)
@@ -341,7 +378,7 @@ RunService:BindToRenderStep("PortDirector", Enum.RenderPriority.Camera.Value + 1
 	hudT += rawDt
 	if hudT > 0.2 then
 		hudT = 0
-		local pos, aim = rig.pos, rig.aim
+		local pos, aim = rig.lensPos or rig.pos, rig.aim
 		local hdg = math.round((math.deg(math.atan2(aim.X - pos.X, -(aim.Z - pos.Z))) + 360) % 360) % 360
 		local rng = math.sqrt((pos.X - st.posX) ^ 2 + pos.Z ^ 2) / 1852
 		local altFt = math.round(pos.Y * 3.281 / 10) * 10

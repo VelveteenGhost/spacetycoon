@@ -22,8 +22,11 @@ Look.WX = {
 }
 
 -- Baked skies (tools/reference/bake_sky.py, then tools/sky_faces.py), by sun preset and weather. Broken weather
--- shows the clear sky under Roblox's cloud layer.
+-- shows the clear sky under Roblox's cloud layer. Above 30 km the camera sees black, as the mood study drops its sky.
+local SPACE = 140544353846875
+Look.SPACE_ALT = 30000
 Look.SKIES = {
+	space = { Ft = SPACE, Bk = SPACE, Lf = SPACE, Rt = SPACE, Up = SPACE, Dn = SPACE },
 	sunrise_clear = {
 		Ft = 74452865708429, Bk = 76395395920883, Lf = 125463061980066,
 		Rt = 104748221518327, Up = 128230331054611, Dn = 71567945509173,
@@ -81,8 +84,8 @@ local function scale(c, k)
 end
 
 local skyKey
-local function setSkybox(sun, wx)
-	local key = sun .. "_" .. (wx == "marine" and "marine" or "clear")
+local function setSkybox(sun, wx, space)
+	local key = space and "space" or sun .. "_" .. (wx == "marine" and "marine" or "clear")
 	if key == skyKey then
 		return
 	end
@@ -140,7 +143,7 @@ function Look.setExposure(e, wx, dip)
 	Lighting.ExposureCompensation = Look.EXPOSURE_BIAS + math.log(base / 0.7 * k, 2)
 end
 
--- state: sun (a PRESETS name), elev, wx ("clear" | "broken" | "marine"), camFog (the shot's haze multiplier), alt (vehicle altitude, m),
+-- state: sun (a PRESETS name), elev, wx ("clear" | "broken" | "marine"), camAlt (camera height, m), camFog (the shot's haze multiplier), alt (vehicle altitude, m),
 -- dip (0..1, how much the engines' glare stops the camera down), proxy (true while the far-camera copy shows)
 function Look.apply(state)
 	local e = state.elev or Look.PRESETS[state.sun or "sunrise"]
@@ -149,7 +152,7 @@ function Look.apply(state)
 	local night = 1 - smooth(-2, 10, e)
 
 	-- LightingStyle (Realistic) is a place setting: game scripts can't write it at runtime
-	setSkybox(state.sun or "sunrise", state.wx or "clear")
+	setSkybox(state.sun or "sunrise", state.wx or "clear", (state.camAlt or 0) > Look.SPACE_ALT)
 	Lighting.GeographicLatitude = Look.LATITUDE
 	-- Roblox darkens and tints the skybox as its sun sinks, past what the baked sky can make up for below the horizon
 	-- (tools/sky_faces.py). The sun casts no light there anyway, so it waits at the morning angle, where the tint is
@@ -166,8 +169,13 @@ function Look.apply(state)
 	local sky = C.skyBlue:Lerp(C.skyDay, smooth(-5, 16, e))
 	Lighting.OutdoorAmbient = scale(sky, hemiI * 1.1)
 	Lighting.Ambient = scale(sky, hemiI * 0.45)
-	Lighting.EnvironmentDiffuseScale = 1
-	Lighting.EnvironmentSpecularScale = 1
+	-- above the sky the black skybox would light nothing: the vehicle takes its fill from OutdoorAmbient instead
+	local space = (state.camAlt or 0) > Look.SPACE_ALT
+	Lighting.EnvironmentDiffuseScale = space and 0 or 1
+	Lighting.EnvironmentSpecularScale = space and 0.3 or 1
+	if space then
+		Lighting.OutdoorAmbient, Lighting.Ambient = Color3.new(0.38, 0.45, 0.55), Color3.new(0.18, 0.22, 0.28)
+	end
 	Lighting.GlobalShadows = true
 
 	Look.setExposure(e, state.wx, state.dip)
@@ -227,6 +235,13 @@ function Look.apply(state)
 	-- floodlights: on below about +9 degrees, full by +1 (metal-halide warm white); setFloods applies it
 	local flood = 1 - smooth(1, 9, e)
 	Look.flood, Look.night, Look.elev = flood, night, e
+	-- for the exhaust puffs, which colour themselves (Puffs): the mood study's smoke ambient, the haze colour, the
+	-- weather's sun factor and the true sun (Roblox's waits at the morning angle at blue hour)
+	local lum = 0.2126 * sky.R + 0.7152 * sky.G + 0.0722 * sky.B
+	Look.smokeAmb = scale(sky:Lerp(Color3.new(lum, lum, lum), 0.55), hemiI * 1.3 + 0.2)
+	Look.fogColor, Look.sunFactor = fogCol, W.sun
+	local er = math.rad(e)
+	Look.sunDir = Vector3.new(0.99 * math.cos(er), math.sin(er), -0.14 * math.cos(er)).Unit -- azimuth 98
 	Look.fogDensity = fogBase * (state.camFog or 1) * thin -- the mood study's per-shot fog density, per metre
 	return flood
 end

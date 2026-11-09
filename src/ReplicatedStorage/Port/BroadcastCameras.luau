@@ -15,11 +15,11 @@ Cams.CAMS = {
 	mount = { fov = 42, label = "Cam 9 · Launch mount", shake = 1, prox = 1, fog = 1 },
 	pad = { fov = 38, label = "Cam 7 · Pad perimeter", shake = 0.5, prox = 1, fog = 1 },
 	drone = { fov = 16, label = "Cam 3 · Aerial", shake = 0.03, prox = 0.6, fog = 1 },
-	long = { fov = 4.4, label = "Cam 1 · Long lens", shake = 0.06, prox = 0.5, fog = 1 },
+	long = { fov = 4.4, label = "Cam 1 · Long lens", shake = 0.06, prox = 0.5, fog = 1, dolly = true },
 	press = { fov = 14, label = "Cam 6 · Press site", shake = 0, prox = 0.35, fog = 0.45 },
-	coast = { fov = 6, label = "Cam 5 · Coastline, 3 km", shake = 0, prox = 0.35, fog = 0.45 },
+	coast = { fov = 6, label = "Cam 5 · Coastline, 3 km", shake = 0, prox = 0.35, fog = 0.45, dolly = true },
 	wide = { fov = 8, label = "Cam 4 · Wide, 4 km", shake = 0, prox = 0.3, fog = 0.4 },
-	tracker = { fov = 2, label = "Cam 2 · Tracker, 11 km", shake = 0, prox = 0.25, fog = 0.25 },
+	tracker = { fov = 2, label = "Cam 2 · Tracker, 11 km", shake = 0, prox = 0.25, fog = 0.25, dolly = true },
 }
 
 Cams.CUTS = {
@@ -78,6 +78,11 @@ local function trailRoom(st, camPos, d, fovDeg)
 	local dist = (camPos - d).Magnitude
 	return d - st.rv.Unit * (dist * math.tan(rad(fovDeg / 2)) * 0.38 * room)
 end
+
+-- Roblox culls small parts by size and distance whatever the lens, so on a phone a long lens on a distant vehicle
+-- shows empty sky. The long-lens cameras move in along the line of sight until the vehicle spans at least this many
+-- degrees unzoomed, widening the lens to keep the framing at the vehicle's depth.
+Cams.MIN_SPAN = 2
 
 -- Returns the camera frame in metres, the vertical field of view and the on-screen label.
 function Cams.update(rig, st, t, dt, heard, aspect, motion)
@@ -198,11 +203,20 @@ function Cams.update(rig, st, t, dt, heard, aspect, motion)
 		rig.aim = rig.aim:Lerp(desired, 1 - math.exp(-k * dt))
 	end
 
-	-- Narrower than Roblox's 1 degree: keep the framing by moving in along the line of sight.
-	rig.lensFov = fov -- the real lens, for the telemetry's focal length
+	-- Narrower than Roblox's 1 degree, or a vehicle too small for Roblox to draw: keep the framing by moving in along
+	-- the line of sight.
+	rig.lensFov, rig.lensPos = fov, pos -- the real lens and where it stands, for the telemetry and the sky
+	local f = 1
 	if fov < 1 then
-		pos = rig.aim + (pos - rig.aim) * (math.tan(rad(fov / 2)) / math.tan(rad(0.5)))
-		fov = 1
+		f = math.tan(rad(fov / 2)) / math.tan(rad(0.5))
+	end
+	if cc.dolly then
+		local span = deg(2 * math.atan(35 / (Flight.focus(st, 35) - pos).Magnitude)) -- the vehicle is 70 m tall
+		f = math.min(f, span / (rig.minSpan or Cams.MIN_SPAN))
+	end
+	if f < 1 then
+		pos = rig.aim + (pos - rig.aim) * f
+		fov = deg(2 * math.atan(math.tan(rad(fov / 2)) / f))
 	end
 
 	local cf = CFrame.lookAt(pos, rig.aim, Vector3.yAxis)

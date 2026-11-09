@@ -23,15 +23,32 @@ local MIN_LIGHT_RANGE = 5 -- studs: Roblox draws nothing from a light with a ran
 local PROXY_LIGHT_GAIN = 6 -- the copy's floods, reaching only a few studs, need this much more to read from afar
 local S = 1 / 0.28
 
--- Ground bands along x, table metres, matching SceneBuilder's land, beach and sea; they span z +-40 km. Smooth
+-- Ground bands along x, table metres, matching SceneBuilder's land, beach and sea. They reach at least 40 km from
+-- the camera, and six times its height once it climbs with the vehicle, so the edge stays near the horizon. Smooth
 -- plastic throughout: material textures are sized in studs, so on the scaled copy they would show 1/s too large.
-local GROUND_Z = 40000
+local GROUND_REACH, GROUND_REACH_MAX = 40000, 600000
+local HIGH = 2000 -- studs: above this the real ground is out of reach, so the copy has no hole under the camera
 local GROUND_BANDS = {
-	{ -40000, 441, Color3.fromRGB(103, 102, 70), Enum.Material.SmoothPlastic },
+	{ -math.huge, 441, Color3.fromRGB(103, 102, 70), Enum.Material.SmoothPlastic },
 	{ 441, 540, Color3.fromRGB(184, 168, 136), Enum.Material.SmoothPlastic },
 	{ 540, 560, Color3.fromRGB(122, 109, 88), Enum.Material.SmoothPlastic },
-	{ 560, 40000, Color3.fromRGB(29, 52, 70), Enum.Material.SmoothPlastic },
+	{ 560, math.huge, Color3.fromRGB(29, 52, 70), Enum.Material.SmoothPlastic },
 }
+
+-- Above the sky (Look.SPACE_ALT) Realistic lighting has no sky left to light distant ground, and a sunrise sun only
+-- grazes it, so the bands glow instead, in their colours seen through the haze.
+local HAZE = Color3.new(0.55, 0.63, 0.75)
+
+function FarProxy:setGroundGlow(on)
+	if on ~= self.groundGlow then
+		self.groundGlow = on
+		self.holeCentre = nil -- rebuild
+	end
+end
+
+local function groundReach(camPos)
+	return math.clamp(6 * camPos.Y / S, GROUND_REACH, GROUND_REACH_MAX) * S
+end
 
 local function quiet(part)
 	part.Anchored, part.CanCollide, part.CanTouch, part.CanQuery = true, false, false, false
@@ -135,8 +152,10 @@ function FarProxy:buildGround(camPos)
 	local s = self.scale
 	local tile = 2000 / s
 	local thick = 0.05 / s
-	local h = FarProxy.HOLE
+	local h = camPos.Y < HIGH and FarProxy.HOLE or 0
 	local hx0, hx1, hz0, hz1 = camPos.X - h, camPos.X + h, camPos.Z - h, camPos.Z + h
+	local reach = groundReach(camPos)
+	self.groundReach = reach
 	local function rect(x0, x1, z0, z1, color, material)
 		local x = x0
 		while x < x1 - 1e-3 do
@@ -146,7 +165,11 @@ function FarProxy:buildGround(camPos)
 				local d = math.min(tile, z1 - z)
 				local p = Instance.new("Part")
 				p.Name = "ProxyGround"
-				p.Color, p.Material = color, material
+				if self.groundGlow then
+					p.Color, p.Material = color:Lerp(HAZE, 0.35), Enum.Material.Neon
+				else
+					p.Color, p.Material = color, material
+				end
 				quiet(p)
 				local size = Vector3.new(w, thick, d)
 				p.Size = size * s
@@ -157,10 +180,13 @@ function FarProxy:buildGround(camPos)
 			x += w
 		end
 	end
-	local z0, z1 = -GROUND_Z * S, GROUND_Z * S
+	local z0, z1 = camPos.Z - reach, camPos.Z + reach
 	for _, band in GROUND_BANDS do
-		local x0, x1, color, material = band[1] * S, band[2] * S, band[3], band[4]
-		if hx1 <= x0 or hx0 >= x1 then
+		local x0, x1 = math.max(band[1] * S, camPos.X - reach), math.min(band[2] * S, camPos.X + reach)
+		local color, material = band[3], band[4]
+		if x1 <= x0 then
+			continue
+		elseif h == 0 or hx1 <= x0 or hx0 >= x1 then
 			rect(x0, x1, z0, z1, color, material)
 		else
 			local cx0, cx1 = math.max(x0, hx0), math.min(x1, hx1)
@@ -250,7 +276,11 @@ function FarProxy:update(camPos, pad, mode, vehiclePos)
 		rescaled = true
 	end
 	local flat = Vector3.new(camPos.X, 0, camPos.Z)
-	if rescaled or not self.holeCentre or (flat - self.holeCentre * Vector3.new(1, 0, 1)).Magnitude > FarProxy.HOLE / 3 then
+	local reachDrift = self.groundReach and math.abs(groundReach(camPos) / self.groundReach - 1) > 0.25
+	if rescaled or reachDrift or not self.holeCentre
+		or (flat - self.holeCentre * Vector3.new(1, 0, 1)).Magnitude
+			> (camPos.Y < HIGH and FarProxy.HOLE / 3 or self.groundReach * 0.1)
+	then
 		self:buildGround(camPos)
 	end
 	local s = self.scale

@@ -31,6 +31,7 @@ local TEX = {
 }
 local WIND = Vector3.new(0.7, 0, 2.6) -- m/s
 local NOZZLE_Y = 8 -- m, the exit plane (VEH_S1_Body.Nozzles)
+local VAC_Y = 50.7 -- m, the upper stage's vacuum nozzle exit (VEH_S2_Body.VacuumNozzleExit)
 local COL = {
 	core = Color3.new(1, 0.57, 0.24),
 	glow = Color3.new(1, 0.4, 0.11),
@@ -353,6 +354,34 @@ function Effects.new(port)
 		table.insert(self.iceBands, { part = p, e = e, mid = (band.y0 + band.y1) / 2, share = band.share })
 	end
 
+	-- the upper stage's vacuum engine: a small orange core and a huge milky bell that grows as it settles in
+	local nozzle2 = part("Nozzle2", Vector3.new(1.2, 0.2, 1.2) * S, folder)
+	self.nozzle2 = nozzle2
+	self.vacCore = emitter(nozzle2, "VacCore", {
+		Texture = TEX.glow,
+		LightEmission = 1,
+		LightInfluence = 0,
+		LockedToPart = true,
+		EmissionDirection = Enum.NormalId.Bottom,
+		Lifetime = NumberRange.new(0.16, 0.2),
+		Speed = NumberRange.new(26 / 0.2 * S * 0.9, 26 / 0.16 * S),
+		Size = ns({ { 0, 1.2 * S, 0.2 * S }, { 0.4, 1.9 * S }, { 1, 3 * S, 0.5 * S } }),
+		Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, Color3.new(1, 0.64, 0.27)),
+			ColorSequenceKeypoint.new(0.5, Color3.new(1, 0.5, 0.16)),
+			ColorSequenceKeypoint.new(1, Color3.new(1, 0.41, 0.1)),
+		}),
+		Transparency = ns({ { 0, 0.1 }, { 0.5, 0.5 }, { 1, 0.85 } }),
+		Rotation = NumberRange.new(0, 360),
+	})
+	local v0 = attach(nozzle2, "VacExit")
+	self.vacEnd = attach(nozzle2, "VacBellEnd")
+	self.vacBell = beam(nozzle2, "VacBell", v0, self.vacEnd, {
+		Color = ColorSequence.new(Color3.new(1, 0.88, 0.77)),
+		LightEmission = 1,
+		TextureSpeed = 0.1,
+	})
+
 	-- the flame light: under the mount on the pad, then riding below the plume
 	self.lightPart = part("FlameLight", Vector3.one, folder)
 	self.light = Instance.new("PointLight")
@@ -366,7 +395,7 @@ function Effects.new(port)
 			table.insert(self.emitters, d)
 		end
 	end
-	self.moving = { nozzle, self.lightPart, self.iceBands[1].part, self.iceBands[2].part }
+	self.moving = { nozzle, self.lightPart, self.iceBands[1].part, self.iceBands[2].part, nozzle2 }
 	self.cfs = {}
 	folder.Parent = port
 	return self
@@ -499,10 +528,31 @@ function Effects:update(st, t, camPos, mode)
 	self.light.Brightness = on and thrust * (3.2 + flick * 0.6) * (alt < 25 and 1 or 1.6) * 0.5 or 0
 	self.light.Color = COL.light:Lerp(Color3.new(0.35, 1, 0.45), green)
 
+	-- upper stage: the vacuum engine after separation, its bell growing as it settles in
+	local s2 = st.s2Thrust
+	local upper = Flight.upper(st)
+	local nozzle2Cf = CFrame.new(upper:PointToWorldSpace(Vector3.new(0, VAC_Y, 0)) * S) * upper.Rotation
+	local s2on = s2 > 0.01
+	self.vacCore.Enabled = s2on
+	self.vacCore.Rate = s2on and 120 or 0
+	self.vacCore.Brightness = 8 * s2 * flick
+	local rb = math.min(170, 26 + math.max(0, st.tRel - Flight.T_SES) * 9)
+	local endOn2 = math.abs(((nozzle2Cf.Position - camPos).Unit):Dot(-upper.UpVector))
+	local bellVis = s2on and not onboard and 1 - smooth(0.45, 0.8, endOn2) or 0
+	self.vacBell.Enabled = bellVis > 0.01
+	self.vacEnd.Position = Vector3.new(0, -rb * 2.4 * S, 0)
+	self.vacBell.Width0, self.vacBell.Width1 = 0.024 * rb * S, 2 * rb * S
+	self.vacBell.Brightness = 1.3 * s2
+	self.vacBell.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 1 - 0.1 * bellVis),
+		NumberSequenceKeypoint.new(1, 1),
+	})
+
 	self.cfs[1] = nozzleCf
 	self.cfs[2] = CFrame.new(lightPos)
 	self.cfs[3] = CFrame.new(stack:PointToWorldSpace(Vector3.new(0, self.iceBands[1].mid, 0)) * S) * stack.Rotation
 	self.cfs[4] = CFrame.new(stack:PointToWorldSpace(Vector3.new(0, self.iceBands[2].mid, 0)) * S) * stack.Rotation
+	self.cfs[5] = nozzle2Cf
 	Workspace:BulkMoveTo(self.moving, self.cfs, Enum.BulkMoveMode.FireCFrameChanged)
 end
 

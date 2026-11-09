@@ -62,6 +62,7 @@ function FarProxy.new(sources)
 	root.Name = "FarProxy"
 	self.root, self.entries, self.groups = root, {}, {}
 	self.attachments, self.beams, self.realBeams, self.bones, self.lights = {}, {}, {}, {}, {}
+	self.textures = {}
 	self.groundEntries = {}
 
 	for _, src in sources do
@@ -98,6 +99,8 @@ function FarProxy.new(sources)
 				end
 			elseif d:IsA("Beam") then
 				table.insert(self.beams, { beam = d, w0 = d.Width0, w1 = d.Width1, c0 = d.CurveSize0, c1 = d.CurveSize1 })
+			elseif d:IsA("Texture") then
+				table.insert(self.textures, { tex = d, u = d.StudsPerTileU, v = d.StudsPerTileV }) -- the surf
 			elseif d:IsA("Light") then
 				d.Shadows = false -- a shadow map can't resolve the copy's few-stud geometry
 				d:SetAttribute("ProxyGain", PROXY_LIGHT_GAIN) -- Look.setFloods applies it (matched on the wide shot)
@@ -166,7 +169,8 @@ function FarProxy:buildGround(camPos)
 				local p = Instance.new("Part")
 				p.Name = "ProxyGround"
 				if self.groundGlow then
-					p.Color, p.Material = color:Lerp(HAZE, 0.35), Enum.Material.Neon
+					local c = color:Lerp(HAZE, 0.35) -- Neon is steep: 0.7 of this reads as daylight through haze (Nov 9)
+					p.Color, p.Material = Color3.new(c.R * 0.7, c.G * 0.7, c.B * 0.7), Enum.Material.Neon
 				else
 					p.Color, p.Material = color, material
 				end
@@ -225,6 +229,9 @@ function FarProxy:setScale(s)
 	end
 	for _, l in self.lights do
 		l.light.Range = math.max(l.range * s, MIN_LIGHT_RANGE)
+	end
+	for _, x in self.textures do
+		x.tex.StudsPerTileU, x.tex.StudsPerTileV = x.u * s, x.v * s
 	end
 end
 

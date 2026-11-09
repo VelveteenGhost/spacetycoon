@@ -26,6 +26,7 @@ unused ones in the Creator Dashboard. A fixed file goes up as a new revision of 
 | SKY morning marine (6) | Ft 99914108142373, Bk 138431261291023, Lf 119214462142794, Rt 95558103401701, Up 120542799668619, Dn 119126671791747 | `art/sky/morning_marine/roblox/` | 1 | 2026-11-09 | `Look.SKIES` | |
 | SKY blue clear (6) | Ft 75412030884892, Bk 102513676718498, Lf 97168747930666, Rt 117543217177987, Up 120942709483749, Dn 91984109479355 | `art/sky/blue_clear/roblox/` | 1 | 2026-11-09 | `Look.SKIES` | "v4" in the names |
 | SKY blue marine (6) | Ft 139294421549517, Bk 135094528664117, Lf 95171566630310, Rt 136177695619367, Up 138485525349648, Dn 109081657162555 | `art/sky/blue_marine/roblox/` | 1 | 2026-11-09 | `Look.SKIES` | "v2" in the names |
+| SKY space | 140544353846875 | `art/sky/space/black.png` | 1 | 2026-11-09 | `Look.SKIES.space` | Near-black, all six faces, for cameras above 30 km |
 | SKY debug (6) | Ft 121822676620631, Bk 90217123698292, Lf 114205032131790, Rt 115261494877789, Up 131034227023496, Dn 109041593503491 | `art/sky/debug/` | 1 | 2026-11-09 | none | Grey labelled faces for checking how Roblox orients a skybox |
 
 Superseded sky uploads from the Nov 9 tuning passes, safe to archive: every "SKY ..." image without a matching row

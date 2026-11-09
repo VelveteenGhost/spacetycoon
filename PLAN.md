@@ -239,6 +239,8 @@ test. Tune with two captures per change: Studio renders lazily when it isn't foc
 - Ground cloud from the trench, a ring at the mount, columns and both sides: lit billow textures, drag and wind.
 - Vents at the vehicle, the mount and the fuel arm (stopping as the arm swings clear); ice shed from both frost
   bands at ignition, a Grid2x2 flipbook that flutters.
+- Surf: the mood study's two foam layers off the beach, ±6 km along the shore, scrolled toward it (`Surf`, built by
+  SceneBuilder); the far-camera copy carries them at its scale.
 - Textures: `art/effects/`, uploaded (ASSETS.md).
 
 Checked as stills on the mount and pad cameras (static fire T+3, launch T+4). Unfocused, Studio runs particles at
@@ -246,22 +248,29 @@ about a ninth of real time, so fast ones (the flame) clump in captures and the c
 motion needs a look at full frame rate, in focused Studio or on the phone.
 
 Open, after the phone test:
-- **Far cameras (drone and beyond) don't show effects yet.** They see the far-camera copy, whose ground plane hides
-  real particles below eye level, and the real distance fogs them out. Plan: simulate the ground cloud, contrail and
-  separation gas as puffs in Lua in true space (as the mood study does) and draw them as billboards mapped into
-  whichever space is live; flame glows the same way. That also keeps the cloud continuous across cuts.
-- Surf foam on the shoreline.
+- **Far cameras (drone and beyond) see the ground cloud, contrail and flame through `Puffs`** (phase 7), not the
+  particles: the copy's ground hides real particles below eye level, and real distance fogs them out. The vents and
+  ice stay near-camera only, where they're visible anyway.
 - MicroProfiler at liftoff with the cloud at its fullest.
 
 ### 7. Altitude set
 
-A separate area where the vehicle stays near the origin while a backdrop moves past: an ocean-and-land plane with
-haze, a horizon gradient and a curved limb.
+**Status Nov 9: built on the far-camera copy rather than a separate set.** The vehicle flies its true trajectory to
+T+156; every camera beyond the pad sees the site, the ground and the vehicle through the copy, so no backdrop set
+was needed. DECISIONS.md has the reasons.
 
-- Covers Max-Q, MECO, separation, second-stage ignition with the MVac heat ramp, and the booster tumbling about its
-  centre of mass.
-- Contrail: particles for the first 6–8 s, then aging smoke Beams.
-- Rebuild Cam 2 (tracker) here at 1° or wider. Cams 12 and 14 ride the vehicle.
+- The launch runs its full length (MECO T+118, separation T+121, second-stage ignition T+127, booster tumble).
+- Contrail, separation gas and the far cameras' ground cloud: `Puffs`, simulated in true space and drawn into either
+  space; a seek catches them up. The far cameras' flame is a chain of glows there too.
+- Upper stage: vacuum flame and the growing milky bell (`Effects`).
+- Long lenses (tracker, coast, long) dolly in when the vehicle would be too small for Roblox to draw on a phone,
+  keeping the framing at the vehicle; the tracker reads at quality level 1.
+- Above 30 km (the onboard cameras): black sky, the copy's ground widened with height and glowing through haze,
+  and fill light from OutdoorAmbient.
+
+Open: the MVac and bell heat glow (SurfaceAppearance emissive needs a mask the export doesn't have); a curved limb
+(the ground is flat to six times the camera's height); floating origin, if the onboard shots jitter at 50 km
+(untested at full frame rate).
 
 ### 8. Done checks
 

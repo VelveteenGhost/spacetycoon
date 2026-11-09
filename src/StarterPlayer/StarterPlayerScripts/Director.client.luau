@@ -89,8 +89,15 @@ local proxy = FarProxy.new({
 	{ model = site:WaitForChild("Flag"), name = "Flag" },
 	{ model = port:WaitForChild("Ground"):WaitForChild("ServiceBuildings"), name = "ServiceBuildings" },
 	{ model = port:WaitForChild("Lights"), name = "Lights" },
+	{ model = port:WaitForChild("Surf"), name = "Surf" },
 })
 local glows = Glows.new(port)
+local surf = {} -- the foam textures, scrolled toward the beach
+for _, d in port.Surf:GetDescendants() do
+	if d:IsA("Texture") then
+		table.insert(surf, d)
+	end
+end
 local effects = Effects.new(port) -- after the copy is made, which doesn't carry particles
 local puffs = Puffs.new()
 
@@ -311,6 +318,14 @@ RunService:BindToRenderStep("PortDirector", Enum.RenderPriority.Camera.Value + 1
 	end
 	if rig.mode == "press" then
 		waveFlag(t)
+	end
+	for _, tex in surf do
+		tex.OffsetStudsV = (t * tex:GetAttribute("Speed")) % tex.StudsPerTileV
+	end
+	if proxy.active then
+		for _, x in proxy.textures do
+			x.tex.OffsetStudsV = (t * x.tex:GetAttribute("Speed")) % x.v * proxy.scale
+		end
 	end
 	effects:update(st, t, camera.CFrame.Position, rig.mode)
 

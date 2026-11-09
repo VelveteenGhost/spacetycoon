@@ -21,6 +21,18 @@ Newest first. One line of reason each.
   quality level, so the tuning names its level.
 - **The far-camera copy carries the lights too, at a 5-stud minimum range and 6× brightness.** Lights scaled to a
   couple of studs draw nothing, and the floods are what the far shots see at night.
+- **Fly the altitude set on the true trajectory through the far-camera copy, not on a separate backdrop set.** The
+  copy already shows any distance at any scale, so the tracker and the onboard cameras just keep using it; the copy's
+  ground widens with the camera's height.
+- **Simulate the contrail, the separation gas and the far cameras' ground cloud in Lua (`Puffs`), drawn as
+  billboards.** Roblox particles live in one space, so they can't follow the copy's scale and recentring, and real
+  ones are hidden by the copy's ground and fogged by real distance. True-space puffs also stay continuous across cuts.
+  The near cameras keep the particle cloud, which looked better up close.
+- **Long lenses dolly in, widening the lens, when the vehicle would span under 2° unzoomed.** Roblox culls small parts
+  by size and distance whatever the lens, so the tracker showed empty sky at quality level 1; framing at the
+  vehicle's depth is unchanged, only the background's perspective shifts.
+- **Above 30 km: a black skybox, glowing ground in the copy, and fill from OutdoorAmbient.** The mood study drops its
+  sky there; under Realistic lighting a black sky lights nothing, so the ground glows in its hazed colours.
 - **Glows are BillboardGuis on Terrain attachments, placed each frame in real or copy space.** One set serves
   every camera without copying billboards into the proxy.
 

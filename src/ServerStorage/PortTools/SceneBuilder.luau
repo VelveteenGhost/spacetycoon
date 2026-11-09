@@ -493,6 +493,54 @@ local function buildLights()
 		surface.Parent = pool
 	end
 end
+-- Surf (PLAN.md phase 6): the mood study's two foam layers off the beach, rolling toward it at different speeds. The
+-- Director scrolls them by each texture's Speed attribute (studs per second). A Texture has one transparency, so each
+-- layer is two strips that fade out to sea. Parts lie along the shore, so the foam's crests (along U) run with it.
+local FOAM = "rbxassetid://131903125071793"
+local SURF = {
+	{ x = 558, w = 90, tileU = 60, tileV = 30, speed = 1.5 },
+	{ x = 558, w = 140, tileU = 90, tileV = 45, speed = 1 },
+}
+local SURF_Z = 6000 -- m either side of the pad
+local function buildSurf()
+	local rig = folder("Surf", port)
+	local seg = 2000 / S -- m: a part may not pass 2048 studs
+	for li, layer in SURF do
+		for _, strip in { { 0, 0.4, 0.35 }, { 0.4, 1, 0.7 } } do -- { from, to, transparency } across the layer
+			local x0, x1 = layer.x + layer.w * strip[1], layer.x + layer.w * strip[2]
+			local z = -SURF_Z
+			while z < SURF_Z do
+				local len = math.min(seg, SURF_Z - z)
+				local p = Instance.new("Part")
+				p.Name = "SurfStrip"
+				p.Size = Vector3.new(len, 0.05, x1 - x0) * S
+				p.Transparency = 1
+				p.Anchored, p.CanCollide, p.CanTouch, p.CanQuery = true, false, false, false
+				p.CastShadow = false
+				p.CFrame = CFrame.new((x0 + x1) / 2 * S, (0.02 + li * 0.01) * S, (z + len / 2) * S)
+					* CFrame.Angles(0, math.pi / 2, 0)
+				local tex = Instance.new("Texture")
+				tex.Texture = FOAM
+				tex.Face = Enum.NormalId.Top
+				tex.StudsPerTileU, tex.StudsPerTileV = layer.tileU * S, layer.tileV * S
+				tex.Transparency = strip[3]
+				tex:SetAttribute("Speed", layer.speed * S)
+				tex.Parent = p
+				p.Parent = rig
+				z += len
+			end
+		end
+	end
+end
+SceneBuilder.buildSurf = function()
+	port = Workspace:WaitForChild("Port")
+	local old = port:FindFirstChild("Surf")
+	if old then
+		old:Destroy()
+	end
+	buildSurf()
+end
+
 SceneBuilder.buildLights = function()
 	port = Workspace:WaitForChild("Port")
 	local old = port:FindFirstChild("Lights")
@@ -504,7 +552,7 @@ end
 
 function SceneBuilder.clear()
 	port = Workspace:WaitForChild("Port")
-	for _, name in { "Ground", "Lights" } do
+	for _, name in { "Ground", "Lights", "Surf" } do
 		local old = port:FindFirstChild(name)
 		if old then
 			old:Destroy()
@@ -536,6 +584,7 @@ function SceneBuilder.build(opts)
 	status("ground")
 	buildGround()
 	buildLights()
+	buildSurf()
 	if opts.coast ~= false then
 		status("coast: dune and beach")
 		buildCoast()

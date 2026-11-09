@@ -4,8 +4,9 @@
 --
 -- Controls: the deck, or keys 1 prop load, 2 static fire, 3 launch, A auto camera, C next camera, H overlay.
 -- Testing from Studio (Client datamodel), via Workspace.Port attributes: Sequence ("hold" | "static" | "launch"),
--- Camera ("auto" | a camera name), SeekT (jump to that tRel), Paused (freeze time) and Motion (false turns off the
--- handheld drift, to compare with the mood study's reference frames).
+-- Camera ("auto" | a camera name), SeekT (jump to that tRel), Paused (freeze time), Motion (false turns off the
+-- handheld drift, to compare with the mood study's reference frames) and Proxy (false shows the real complex to
+-- the far cameras).
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -17,6 +18,7 @@ local Port = ReplicatedStorage:WaitForChild("Port")
 local Flight = require(Port:WaitForChild("Flight"))
 local Cams = require(Port:WaitForChild("BroadcastCameras"))
 local Hud = require(Port:WaitForChild("Hud"))
+local FarProxy = require(Port:WaitForChild("FarProxy"))
 
 local S = 1 / 0.28
 local PAD_SET_END = 34 -- the launch loops here until the altitude set (phase 7) takes over at about T+25
@@ -71,6 +73,19 @@ local function waveFlag(t)
 		prev = a
 	end
 end
+
+-- The far cameras see a scaled copy of the complex, since phones don't draw the real one that far out.
+local site = port:WaitForChild("SITE")
+local proxy = FarProxy.new({
+	{ model = port.VEH, name = "VEH" },
+	{ model = port.PAD, name = "PAD" },
+	{ model = port.TWR, name = "TWR" },
+	{ model = site:WaitForChild("Structures"), name = "Structures" },
+	{ model = site:WaitForChild("Placed"), name = "Placed" },
+	{ model = site:WaitForChild("Belts"), name = "Belts" },
+	{ model = site:WaitForChild("Flag"), name = "Flag" },
+	{ model = port:WaitForChild("Ground"):WaitForChild("ServiceBuildings"), name = "ServiceBuildings" },
+})
 
 -- Thrust history: sound and shake reach each camera at the speed of sound.
 local hist = {}
@@ -242,6 +257,11 @@ RunService:BindToRenderStep("PortDirector", Enum.RenderPriority.Camera.Value + 1
 	camera.CameraType = Enum.CameraType.Scriptable
 	camera.FieldOfView = fov
 	camera.CFrame = toStuds(cf)
+	if port:GetAttribute("Proxy") ~= false then
+		proxy:update(camera.CFrame.Position, Vector3.zero, rig.mode, stack.Position)
+	elseif proxy.active then
+		proxy:deactivate()
+	end
 	if rig.mode == "press" then
 		waveFlag(t)
 	end

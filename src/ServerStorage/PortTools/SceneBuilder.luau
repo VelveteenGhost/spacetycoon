@@ -359,8 +359,9 @@ local function buildGround()
 		slab("Dash", x - 1.5, x + 1.5, -0.08, 0.08, 0.15, COLORS.paint, Enum.Material.SmoothPlastic, dashes)
 	end
 	-- two small pad-side service buildings the export doesn't include
-	box("ServiceBuilding", Vector3.new(14, 5, 10), Vector3.new(46, 2.5, -48), COLORS.concrete, Enum.Material.Concrete, ground)
-	box("ServiceBuilding", Vector3.new(8, 4, 8), Vector3.new(-40, 2, -60), COLORS.concrete, Enum.Material.Concrete, ground)
+	local service = folder("ServiceBuildings", ground)
+	box("ServiceBuilding", Vector3.new(14, 5, 10), Vector3.new(46, 2.5, -48), COLORS.concrete, Enum.Material.Concrete, service)
+	box("ServiceBuilding", Vector3.new(8, 4, 8), Vector3.new(-40, 2, -60), COLORS.concrete, Enum.Material.Concrete, service)
 	task.wait()
 end
 

@@ -182,6 +182,29 @@ within draw distance. From that camera it looks identical, the same size and pos
 - To settle first: the safe copy distance at Level 1, and a scaled ground patch under the copy, so its shadows
   land on its own ground.
 
+**Built, Nov 8 (`Port/FarProxy`).** Any camera more than 800 studs from the pad sees the copy, which puts the
+site's farthest content 700 studs out. The copy holds the vehicle, pad, tower, structures, placed props, scrub,
+tree belts and the press flag, with its bones mirrored, about 2,100 parts.
+
+- **The copied ground:** flat bands for land, sand, wet sand and sea out to 40 km, with a 400-stud hole around
+  the camera so the real ground stays in the foreground. The hole's edge is seamless by construction.
+- **Moving cameras:** the parts move each frame with one `BulkMoveTo`, so the drone works as well as the fixed
+  cameras. The playtest ran at 15 fps with and without the copy, so it costs nothing measurable.
+- **Verified at quality Level 1:** the press camera (flag, rocket and the whole site on the horizon), the wide
+  camera (framing matches the reference within 1%, as checked at Level 8 too), and the drone.
+- **Rules learned:**
+  - Anything standing inside the hole must come from the copy; the copied ground otherwise passes in front of
+    real objects just below eye level.
+  - Material textures are sized in studs, so copied ground uses SmoothPlastic.
+  - Copied parts cast no shadows.
+- **Still open:**
+  - The dune ridge flattens beyond about 60 m from the coast and long-lens cameras, since the real dune is only
+    drawn inside the hole. It needs a copied ridge.
+  - The coast, long-lens, tracker and high-altitude onboard shots have no visual check yet.
+  - For the lighting phase: a faint colour step where the real grass meets the copied ground, a sea band that's
+    too dark at the horizon, and per-camera haze.
+  - For phase 6: scaled emitters on the copy.
+
 ### 5. Lighting
 
 Use the guide's table as the starting point: Future lighting, Atmosphere, clouds, bloom, colour grade, sun rays,

@@ -4,6 +4,12 @@ Newest first. One line of reason each.
 
 ## 2026-11-08
 
+- **The far-camera copy includes the ground (flat bands with a hole around the camera) and everything that stands
+  in the shot.** Ground tiles get culled too at low quality. A plane scaled about the camera lines up with the
+  real ground at the hole's edge, but it hides real objects just below eye level, so the press flag is copied
+  as well.
+- **Each frame the copy follows the live camera, scale fixed per shot and rescaled past 20% drift.** It handles
+  the moving drone and handheld drift alike, and rewriting about 2,100 sizes only on a cut keeps frames cheap.
 - **Far cameras get a scaled proxy of the launch complex rather than new camera positions.** Roblox stops
   drawing the complex beyond 2,000–6,000 studs at the quality levels phones use, and scripts can't change that.
   A copy scaled about the camera keeps the mood study's framing and foregrounds exactly; moving cameras in would

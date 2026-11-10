@@ -1,0 +1,33 @@
+{
+  "name": "SpaceTycoon",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "$ignoreUnknownInstances": true,
+      "Port": {
+        "$path": "src/ReplicatedStorage/Port",
+        "$ignoreUnknownInstances": true
+      }
+    },
+    "ServerStorage": {
+      "$className": "ServerStorage",
+      "$ignoreUnknownInstances": true,
+      "PortTools": {
+        "$path": "src/ServerStorage/PortTools",
+        "$ignoreUnknownInstances": true
+      }
+    },
+    "StarterPlayer": {
+      "$className": "StarterPlayer",
+      "$ignoreUnknownInstances": true,
+      "StarterPlayerScripts": {
+        "$className": "StarterPlayerScripts",
+        "$ignoreUnknownInstances": true,
+        "Director": {
+          "$path": "src/StarterPlayer/StarterPlayerScripts/Director.client.luau"
+        }
+      }
+    }
+  }
+}
